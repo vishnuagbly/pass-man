@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:passman/utils/globals.dart';
 import '../screens/screens.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -21,8 +22,23 @@ class HomeScreen extends StatelessWidget {
               ),
             ],
           ),
-          body: FlutterLogo(
-            size: double.infinity,
+          body: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: ListView.builder(
+              itemCount: 10,
+              itemBuilder: (_, i) => Card(
+                child: Container(
+                  width: double.infinity,
+                  height: 100,
+                  child: Center(
+                    child: Text(
+                      'Password',
+                      style: TextStyle(fontSize: 4.w),
+                    ),
+                  ),
+                ),
+              ),
+            ),
           ),
         ),
         LockScreen(),
