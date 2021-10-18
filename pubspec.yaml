@@ -39,7 +39,7 @@ dependencies:
   helpful_components: ^0.0.1
   hive: ^2.0.4
   hive_flutter: ^1.1.0
-  webcrypto: ^0.5.2
+  cryptography: ^2.0.2
   crypto: ^3.0.1
 
 

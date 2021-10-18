@@ -2,8 +2,8 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:crypto/crypto.dart';
+import 'package:cryptography/cryptography.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:webcrypto/webcrypto.dart';
 
 class Storage {
   //Hive Globals
@@ -12,7 +12,8 @@ class Storage {
   static const _lastLoginKey = 'lastLogin';
   static const _mPinKey = 'mPin';
   static const _mPinSaltKey = 'mPinSalt';
-  static const _loginExpiryDuration = Duration(seconds: 30);
+  static const _mPinMacKey = 'mPinMac';
+  static const _loginExpiryDuration = Duration(minutes: 30);
 
   static DateTime get _expiredDate =>
       DateTime.now().subtract(Duration(days: 1));
@@ -29,12 +30,21 @@ class Storage {
   static Future<bool> verifyMPin(String mPin) async {
     final _box = Hive.box(auth);
     final _encryptedMPin = List<int>.from(_box.get(_mPinKey));
+    final _mac = List<int>.from(_box.get(_mPinMacKey));
     final String salt = _box.get(_mPinSaltKey);
 
     final _rawKey = sha256.convert(utf8.encode(mPin + salt));
-    final _key = await AesGcmSecretKey.importRawKey(_rawKey.bytes);
-    final _mPin =
-        utf8.decode(await _key.decryptBytes(_encryptedMPin, utf8.encode(salt)));
+    final _algorithm = AesGcm.with256bits();
+    final _key = await _algorithm.newSecretKeyFromBytes(_rawKey.bytes);
+    final _secretBox = SecretBox(
+      _encryptedMPin,
+      nonce: utf8.encode(salt),
+      mac: Mac(_mac),
+    );
+    final _mPin = utf8.decode(await _algorithm.decrypt(
+      _secretBox,
+      secretKey: _key,
+    ));
     return _mPin == mPin;
   }
 
@@ -49,12 +59,18 @@ class Storage {
     //to generate a salt of 96 bits.
     final String salt = _randomString(6);
     final _rawKey = sha256.convert(utf8.encode(mPin + salt));
-    final _key = await AesGcmSecretKey.importRawKey(_rawKey.bytes);
-    final _mPin = await _key.encryptBytes(utf8.encode(mPin), utf8.encode(salt));
+    final _algorithm = AesGcm.with256bits();
+    final _key = await _algorithm.newSecretKeyFromBytes(_rawKey.bytes);
+    final _mPin = await _algorithm.encrypt(
+      utf8.encode(mPin),
+      secretKey: _key,
+      nonce: utf8.encode(salt),
+    );
 
     final _box = Hive.box(auth);
-    _box.put(_mPinKey, _mPin.toList());
+    _box.put(_mPinKey, _mPin.cipherText);
     _box.put(_mPinSaltKey, salt);
+    _box.put(_mPinMacKey, _mPin.mac.bytes);
   }
 
   static void clearMPin() {
