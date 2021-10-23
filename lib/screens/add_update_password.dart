@@ -11,6 +11,6 @@ class AddUpdatePassword extends StatefulWidget {
 class _AddUpdatePasswordState extends State<AddUpdatePassword> {
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return Scaffold();
   }
 }
