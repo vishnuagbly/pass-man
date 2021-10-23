@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:helpful_components/helpful_components.dart';
-import 'package:passman/utils/globals.dart';
 import 'package:passman/utils/utils.dart';
 
 class AddUpdateNote extends StatefulWidget {
