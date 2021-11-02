@@ -60,13 +60,13 @@ class _AddUpdateNoteState extends State<AddUpdateNote> {
                 maxLines: 10,
               ),
               Globals.kSizedBox,
-              ElevatedButton(
-                child: Text('SUBMIT'),
-                onPressed: onSubmit,
-              ),
             ],
           ),
         ),
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: onSubmit,
+        label: Text("Submit"),
       ),
     );
   }

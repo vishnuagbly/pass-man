@@ -5,6 +5,7 @@ import 'package:passman/utils/utils.dart';
 
 class AddUpdatePassword extends StatefulWidget {
   static const route = '/add-update-password';
+
   const AddUpdatePassword({Key? key}) : super(key: key);
 
   @override
@@ -89,14 +90,14 @@ class _AddUpdatePasswordState extends State<AddUpdatePassword> {
                   validator: Globals.kCommonValidator,
                 ),
                 Globals.kSizedBox,
-                ElevatedButton(
-                  child: Text('SUBMIT'),
-                  onPressed: onSubmit,
-                ),
               ],
             ),
           ),
         ),
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: onSubmit,
+        label: Text("Submit"),
       ),
     );
   }
