@@ -3,16 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'config_route.dart' if (dart.library.html) 'config_route_web.dart';
+import 'config_app.dart' if (dart.library.html) 'config_route_web.dart';
 
 import './utils/utils.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  configureApp();
+  await configureApp();
   await Firebase.initializeApp();
   await Hive.initFlutter();
-  await Hive.openBox(Storage.auth);
+  await Hive.openBox(AuthStorage.auth);
   runApp(ProviderScope(child: ModularApp(module: AppModule(), child: MyApp())));
 }
 

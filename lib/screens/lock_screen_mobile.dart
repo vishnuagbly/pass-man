@@ -37,9 +37,9 @@ class _LockScreenState extends State<LockScreen> {
 
     //Check if token is verified, if verified then no need to authenticate again and
     //re issue token.
-    if (Storage.isTokenValid()) {
+    if (AuthStorage.isTokenValid()) {
       _authorized = __authorized;
-      Storage.reIssueToken();
+      AuthStorage.reIssueToken();
     } else
       _authenticate();
   }
@@ -68,7 +68,7 @@ class _LockScreenState extends State<LockScreen> {
           error: true,
           onPressed: () {
             WidgetsBinding.instance!.addPostFrameCallback((_) {
-              if (Storage.mPassExists()) {
+              if (AuthStorage.mPassExists()) {
                 setState(() {
                   _body = _mPass;
                 });
@@ -84,7 +84,7 @@ class _LockScreenState extends State<LockScreen> {
     }
     if (!mounted) return;
 
-    if (authenticated) Storage.reIssueToken();
+    if (authenticated) AuthStorage.reIssueToken();
     setState(
         () => _authorized = authenticated ? __authorized : __notAuthorized);
   }
@@ -98,7 +98,7 @@ class _LockScreenState extends State<LockScreen> {
             showDialog(
               context: context,
               builder: (_) => FutureDialog<bool>(
-                future: Storage.verifyMPass(text),
+                future: AuthStorage.verifyMPass(text),
                 hasData: (data) {
                   if (data ?? false)
                     return CommonAlertDialog(

@@ -27,7 +27,7 @@ class _AuthStateState extends State<AuthState> {
       //if user is logged in, re-issue token and no-need to change screen, as it
       //will get changed after the animation.
       if (event != null) {
-        Storage.reIssueToken();
+        AuthStorage.reIssueToken();
         return;
       }
       safeSetState(() => user = event);

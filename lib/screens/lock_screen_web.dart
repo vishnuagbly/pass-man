@@ -2,7 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:helpful_components/helpful_components.dart';
-import 'package:passman/utils/storage.dart';
+import 'package:passman/utils/utils.dart';
 
 Widget lockScreen() => LockScreenWeb();
 
@@ -18,8 +18,8 @@ class _LockScreenWebState extends State<LockScreenWeb> {
 
   @override
   void initState() {
-    if (Storage.isTokenValid()) _authorized = true;
-    if (!Storage.mPassExists()) _authorized = true;
+    if (AuthStorage.isTokenValid()) _authorized = true;
+    if (!AuthStorage.mPassExists()) _authorized = true;
     super.initState();
   }
 
@@ -41,7 +41,7 @@ class _LockScreenWebState extends State<LockScreenWeb> {
                         decoration:
                             InputDecoration(hintText: 'Enter M-Password'),
                         onSubmitted: (text) async {
-                          bool verified = await Storage.verifyMPass(text);
+                          bool verified = await AuthStorage.verifyMPass(text);
                           if (!verified) {
                             showDialog(
                               context: context,
@@ -52,7 +52,7 @@ class _LockScreenWebState extends State<LockScreenWeb> {
                             );
                             return;
                           }
-                          Storage.reIssueToken();
+                          AuthStorage.reIssueToken();
                           await showDialog(
                             context: context,
                             builder: (_) => CommonAlertDialog(
