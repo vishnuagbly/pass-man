@@ -80,6 +80,7 @@ class _LockScreenState extends State<LockScreen> {
                 });
                 return;
               }
+              print("M-Pass Does not exist");
               FirebaseAuth.instance.signOut();
             });
             Navigator.pop(context);

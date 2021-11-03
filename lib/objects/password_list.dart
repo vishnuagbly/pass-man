@@ -5,11 +5,14 @@ import 'package:passman/objects/password.dart';
 class PasswordsList extends ChangeNotifier {
   final Map<String,
           AutoDisposeStateNotifierProvider<PasswordNotifier, Password>>
-      _passwords = {};
+      passwords = {};
 
   static AutoDisposeChangeNotifierProvider<PasswordsList>? _provider;
 
-  PasswordsList._();
+  PasswordsList._() {
+    //TODO: Remove this line after the whole passwords system is complete.
+    for (int i = 0; i < 10; i++) add(Password.dummy);
+  }
 
   static AutoDisposeChangeNotifierProvider<PasswordsList> get provider {
     if (_provider == null)
@@ -19,12 +22,13 @@ class PasswordsList extends ChangeNotifier {
     return _provider!;
   }
 
-  void add(Password password) {
-    assert(!_passwords.containsKey(password.uuid),
+  void add(Password password, {bool notify = true}) {
+    assert(!passwords.containsKey(password.uuid),
         'Same id password already exists');
-    _passwords[password.uuid] =
+    passwords[password.uuid] =
         StateNotifierProvider.autoDispose<PasswordNotifier, Password>(
       (ref) => PasswordNotifier(password),
     );
+    if (notify) notifyListeners();
   }
 }

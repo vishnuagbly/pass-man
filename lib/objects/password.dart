@@ -31,6 +31,12 @@ class Password {
     );
   }
 
+  static Password get dummy => Password(
+        username: 'dummy username',
+        url: 'dummy url',
+        password: 'dummy password',
+      );
+
   final String uuid;
   final String url;
   final String username;
