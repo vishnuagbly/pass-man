@@ -40,14 +40,14 @@ class _AddUpdatePasswordState extends State<AddUpdatePassword> {
                   decoration: InputDecoration(
                     hintText: 'URL',
                   ),
-                  validator: Globals.kCommonValidator,
+                  validator: Globals.kFieldRequiredValidator,
                 ),
                 Globals.kSizedBox,
                 TextFormField(
                   decoration: InputDecoration(
                     hintText: 'Username/Email',
                   ),
-                  validator: Globals.kCommonValidator,
+                  validator: Globals.kFieldRequiredValidator,
                 ),
                 Globals.kSizedBox,
                 TextFormField(
@@ -69,7 +69,7 @@ class _AddUpdatePasswordState extends State<AddUpdatePassword> {
                     setState(() {});
                   },
                   obscureText: hidePassword,
-                  validator: Globals.kCommonValidator,
+                  validator: Globals.kFieldRequiredValidator,
                 ),
                 Globals.kSizedBox,
                 AnimatedOpacity(
@@ -87,7 +87,7 @@ class _AddUpdatePasswordState extends State<AddUpdatePassword> {
                   textInputAction: TextInputAction.newline,
                   minLines: 5,
                   maxLines: 5,
-                  validator: Globals.kCommonValidator,
+                  validator: Globals.kFieldRequiredValidator,
                 ),
                 Globals.kSizedBox,
               ],

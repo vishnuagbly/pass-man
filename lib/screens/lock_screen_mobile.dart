@@ -11,6 +11,12 @@ import '../utils/globals.dart';
 
 Widget lockScreen() => LockScreen();
 
+enum _SupportState {
+  unknown,
+  supported,
+  unsupported,
+}
+
 class LockScreen extends StatefulWidget {
   const LockScreen({Key? key}) : super(key: key);
 
@@ -23,7 +29,7 @@ class _LockScreenState extends State<LockScreen> {
   static const __notAuthorized = 'Not Authorized';
   final _formKey = GlobalKey<FormState>();
   final LocalAuthentication auth = LocalAuthentication();
-  SupportState _supportState = SupportState.unknown;
+  _SupportState _supportState = _SupportState.unknown;
   String _authorized = __notAuthorized;
   Widget _body = Container();
 
@@ -32,7 +38,7 @@ class _LockScreenState extends State<LockScreen> {
     super.initState();
     auth.isDeviceSupported().then(
           (isSupported) => setState(() => _supportState =
-              isSupported ? SupportState.supported : SupportState.unsupported),
+              isSupported ? _SupportState.supported : _SupportState.unsupported),
         );
 
     //Check if token is verified, if verified then no need to authenticate again and
@@ -132,7 +138,7 @@ class _LockScreenState extends State<LockScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return (_supportState != SupportState.supported) ||
+    return (_supportState != _SupportState.supported) ||
             (_authorized == __authorized) ||
             (kIsWeb)
         ? Container()
