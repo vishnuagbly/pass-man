@@ -12,7 +12,10 @@ void main() async {
   await configureApp();
   await Firebase.initializeApp();
   await Hive.initFlutter();
-  await Hive.openBox(AuthStorage.auth);
+  await Hive.openBox<String>(AuthStorage.auth);
+  await Hive.openBox(Secrets.boxName);
+  await Hive.openBox<String>(Deleted.boxName);
+  await Hive.openBox<String>(Accounts.boxName);
   runApp(ProviderScope(child: ModularApp(module: AppModule(), child: MyApp())));
 }
 
@@ -24,47 +27,47 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Pass-Man',
       theme: ThemeData(
-        appBarTheme: AppBarTheme(
-          backgroundColor: ColorsUtils.kBackgroundColor,
-          elevation: 0.0,
-          titleTextStyle: Globals.kHeading2Style,
-          titleSpacing: 35,
-        ),
-        snackBarTheme: SnackBarThemeData(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.vertical(top: Radius.circular(10.w)),
+          appBarTheme: AppBarTheme(
+            backgroundColor: ColorsUtils.kBackgroundColor,
+            elevation: 0.0,
+            titleTextStyle: Globals.kHeading2Style,
+            titleSpacing: 35,
           ),
-          contentTextStyle: Globals.kBodyText1Style,
-          backgroundColor: ColorsUtils.kSecondaryColor,
-        ),
-        elevatedButtonTheme: ElevatedButtonThemeData(
-          style: Globals.kElevatedButtonStyle,
-        ),
-        textTheme: ThemeData.dark().textTheme.copyWith(
-              bodyText1: Globals.kBodyText1Style,
-              bodyText2: Globals.kBodyText2Style,
-              subtitle1: Globals.kBodyText1Style, //For TextField default style
+          snackBarTheme: SnackBarThemeData(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(10.w)),
             ),
-        cardTheme: CardTheme(
-          color: ColorsUtils.kElevationColor,
-          shape: RoundedRectangleBorder(
-            borderRadius: Globals.kBorderRadius,
+            contentTextStyle: Globals.kBodyText1Style,
+            backgroundColor: ColorsUtils.kSecondaryColor,
           ),
-        ),
-        inputDecorationTheme: Globals.kInputDecorationTheme,
-        scaffoldBackgroundColor: ColorsUtils.kBackgroundColor,
-        brightness: Brightness.dark,
-        primarySwatch: ColorsUtils.kSecondaryColor,
-        primaryColor: ColorsUtils.kPrimaryColor,
-        colorScheme: ColorScheme.dark(
-          secondary: ColorsUtils.kSecondaryColor,
-        ),
-        primaryColorLight: ColorsUtils.kTextColor,
-        backgroundColor: ColorsUtils.kBackgroundColor,
-        floatingActionButtonTheme: FloatingActionButtonThemeData(
-          extendedTextStyle: Globals.kBodyText3Style,
-        )
-      ),
+          elevatedButtonTheme: ElevatedButtonThemeData(
+            style: Globals.kElevatedButtonStyle,
+          ),
+          textTheme: ThemeData.dark().textTheme.copyWith(
+                bodyText1: Globals.kBodyText1Style,
+                bodyText2: Globals.kBodyText2Style,
+                subtitle1:
+                    Globals.kBodyText1Style, //For TextField default style
+              ),
+          cardTheme: CardTheme(
+            color: ColorsUtils.kElevationColor,
+            shape: RoundedRectangleBorder(
+              borderRadius: Globals.kBorderRadius,
+            ),
+          ),
+          inputDecorationTheme: Globals.kInputDecorationTheme,
+          scaffoldBackgroundColor: ColorsUtils.kBackgroundColor,
+          brightness: Brightness.dark,
+          primarySwatch: ColorsUtils.kSecondaryColor,
+          primaryColor: ColorsUtils.kPrimaryColor,
+          colorScheme: ColorScheme.dark(
+            secondary: ColorsUtils.kSecondaryColor,
+          ),
+          primaryColorLight: ColorsUtils.kTextColor,
+          backgroundColor: ColorsUtils.kBackgroundColor,
+          floatingActionButtonTheme: FloatingActionButtonThemeData(
+            extendedTextStyle: Globals.kBodyText3Style,
+          )),
       initialRoute: '/',
     ).modular();
   }

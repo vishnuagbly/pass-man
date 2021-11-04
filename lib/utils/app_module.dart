@@ -7,7 +7,7 @@ class AppModule extends Module {
         ChildRoute(MPassword.route, child: (_, __) => MPassword()),
         ChildRoute(AuthState.route, child: (_, __) => AuthState()),
         ChildRoute(AddUpdateNote.route, child: (_, __) => AddUpdateNote()),
-        ChildRoute(AddUpdatePassword.route,
-            child: (_, __) => AddUpdatePassword()),
+        ChildRoute(AddUpdateAccount.route,
+            child: (_, __) => AddUpdateAccount()),
       ];
 }

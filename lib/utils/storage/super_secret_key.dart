@@ -8,6 +8,7 @@ SuperSecret getSuperSecret() => superSecret;
 abstract class SuperSecret {
   Future<List<int>> get superSecret;
 
+  ///Generate 256 bit keys for AES-GCM
   Future<List<int>> generateKey() async {
     final algorithm = AesGcm.with256bits();
     return (await algorithm.newSecretKey()).extractBytes();
