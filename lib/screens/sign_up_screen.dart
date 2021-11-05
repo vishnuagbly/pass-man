@@ -1,8 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:helpful_components/helpful_components.dart';
-import 'package:passman/screens/home.dart';
-import 'package:passman/screens/login.dart';
+import 'package:passman/screens/screens.dart';
 import 'package:passman/utils/globals.dart';
 
 class SignUpScreen extends StatefulWidget {
@@ -83,7 +82,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         (_user.displayName?.isEmpty ?? false))
       _screen = _signUpScreen(_user);
     else
-      _screen = HomeScreen();
+      _screen = lockScreen();
     super.initState();
   }
 

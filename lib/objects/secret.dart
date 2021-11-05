@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:uuid/uuid.dart';
 
 class Secret {
@@ -14,6 +16,8 @@ class Secret {
   })  : this.id = id ?? Uuid().v4(),
         this.created = created ?? DateTime.now(),
         this.updated = updated ?? DateTime.now();
+
+  factory Secret.fromString(String text) => Secret.fromMap(jsonDecode(text));
 
   factory Secret.fromMap(Map<String, dynamic> map) {
     return Secret(
@@ -34,4 +38,6 @@ class Secret {
         'created': created.toIso8601String(),
         'updated': updated.toIso8601String(),
       };
+
+  String toString() => jsonEncode(map);
 }

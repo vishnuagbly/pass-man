@@ -18,10 +18,12 @@ abstract class AuthStorage {
   static DateTime get _expiredDate =>
       DateTime.now().subtract(Duration(days: 1));
 
-  static bool isTokenValid() =>
-      DateTime.now().difference((Hive.box(auth)
-          .get(_lastLoginKey, defaultValue: _expiredDate) as DateTime)) <
-      _loginExpiryDuration;
+  static bool isTokenValid() {
+    final _tokenDuration = DateTime.now().difference((Hive.box(auth)
+        .get(_lastLoginKey, defaultValue: _expiredDate) as DateTime));
+    print('Token Duration: $_tokenDuration');
+    return _tokenDuration < _loginExpiryDuration;
+  }
 
   static void reIssueToken() {
     Hive.box(auth).put(_lastLoginKey, DateTime.now());

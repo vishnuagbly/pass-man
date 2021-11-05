@@ -4,8 +4,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_modular/flutter_modular.dart';
 import 'package:helpful_components/helpful_components.dart';
 import 'package:local_auth/local_auth.dart';
+import 'package:passman/screens/home.dart';
 import '../utils/utils.dart';
 import '../utils/globals.dart';
 
@@ -37,8 +39,9 @@ class _LockScreenState extends State<LockScreen> {
   void initState() {
     super.initState();
     auth.isDeviceSupported().then(
-          (isSupported) => setState(() => _supportState =
-              isSupported ? _SupportState.supported : _SupportState.unsupported),
+          (isSupported) => setState(() => _supportState = isSupported
+              ? _SupportState.supported
+              : _SupportState.unsupported),
         );
 
     //Check if token is verified, if verified then no need to authenticate again and
@@ -139,18 +142,24 @@ class _LockScreenState extends State<LockScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return (_supportState != _SupportState.supported) ||
-            (_authorized == __authorized) ||
-            (kIsWeb)
-        ? Container()
-        : GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 7, sigmaY: 7),
-              child: Center(
-                child: _body,
+    if (_authorized == __authorized)
+      WidgetsBinding.instance!.addPostFrameCallback((_) {
+        Modular.to.pushReplacementNamed(HomeScreen.route);
+      });
+    return Scaffold(
+      body: (_supportState != _SupportState.supported) ||
+              (_authorized == __authorized) ||
+              (kIsWeb)
+          ? Container()
+          : GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 7, sigmaY: 7),
+                child: Center(
+                  child: _body,
+                ),
               ),
             ),
-          );
+    );
   }
 }

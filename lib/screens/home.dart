@@ -11,10 +11,6 @@ import 'package:passman/utils/globals.dart';
 import 'add_update_note.dart';
 import 'add_update_account.dart';
 
-import 'lock_screen.dart'
-    if (dart.library.io) 'lock_screen_mobile.dart'
-    if (dart.library.html) 'lock_screen_web.dart';
-
 class HomeScreen extends StatefulWidget {
   static const route = "/home";
 
@@ -29,91 +25,92 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Scaffold(
-          appBar: AppBar(
-            title: Text("Home"),
-            actions: [
-              IconButton(
-                icon: Icon(Icons.logout),
-                onPressed: FirebaseAuth.instance.signOut,
-              ),
-            ],
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Home"),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.logout),
+            onPressed: FirebaseAuth.instance.signOut,
           ),
-          drawer: Drawer(
-            child: Column(
-              children: [
-                IconButton(
-                  onPressed: () => Modular.to.pushNamed(MPassword.route),
-                  icon: Icon(Icons.vpn_key),
-                ),
-              ],
+        ],
+      ),
+      drawer: Drawer(
+        child: Column(
+          children: [
+            IconButton(
+              onPressed: () => Modular.to.pushNamed(MPassword.route),
+              icon: Icon(Icons.vpn_key),
             ),
-          ),
-          body: FutureBuilder<AccountsListProvider>(
-              future: AccountsList.provider,
-              builder: (context, snapshot) {
-                return CommonAsyncSnapshotResponses(
-                  snapshot,
-                  builder: (AccountsListProvider _provider) => Consumer(
-                    builder: (_, ref, __) {
-                      final _accountsList = ref.watch(_provider);
+          ],
+        ),
+      ),
+      body: FutureBuilder<AccountsListProvider>(
+          future: AccountsList.provider,
+          builder: (context, snapshot) {
+            return CommonAsyncSnapshotResponses(
+              snapshot,
+              builder: (AccountsListProvider _provider) => Consumer(
+                builder: (_, ref, __) {
+                  final _accountsList = ref.watch(_provider);
 
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        child: ListView.builder(
-                          itemCount: _accountsList.accounts.values.length,
-                          itemBuilder: (_, i) =>
-                              Consumer(builder: (context, _ref, _) {
-                            final _passProvider =
-                                _accountsList.accounts.values.toList()[i];
-                            final _url = _ref.watch(
-                                _passProvider.select((value) => value.url));
-                            return Card(
-                              child: InkWell(
-                                onTap: () {},
-                                child: Container(
-                                  width: double.infinity,
-                                  height: 100,
-                                  child: Center(
-                                    child: Text(
-                                      _url,
-                                      style: TextStyle(fontSize: 4.w),
-                                    ),
-                                  ),
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: ListView.builder(
+                      itemCount: _accountsList.accounts.values.length,
+                      itemBuilder: (_, i) =>
+                          Consumer(builder: (context, _ref, _) {
+                        final _passProvider =
+                            _accountsList.accounts.values.toList()[i];
+                        final _url = _ref
+                            .watch(_passProvider.select((value) => value.url));
+                        return Card(
+                          child: InkWell(
+                            //TODO: Add Remove Functionality
+                            onTap: () {
+                              Modular.to.pushNamed(
+                                AddUpdateAccount.route,
+                                arguments: _passProvider,
+                              );
+                            },
+                            child: Container(
+                              width: double.infinity,
+                              height: 100,
+                              child: Center(
+                                child: Text(
+                                  _url,
+                                  style: TextStyle(fontSize: 4.w),
                                 ),
                               ),
-                            );
-                          }),
-                        ),
-                      );
-                    },
-                  ),
-                );
-              }),
-          floatingActionButton: SpeedDial(
-            child: Icon(Icons.add),
-            children: [
-              SpeedDialChild(
-                label: "Add/update Password",
-                child: Icon(Icons.security),
-                onTap: () {
-                  Modular.to.pushNamed(AddUpdateAccount.route);
+                            ),
+                          ),
+                        );
+                      }),
+                    ),
+                  );
                 },
               ),
-              SpeedDialChild(
-                label: "Add/update Note",
-                child: Icon(Icons.note_add),
-                onTap: () {
-                  Modular.to.pushNamed(AddUpdateNote.route);
-                },
-              ),
-            ],
+            );
+          }),
+      floatingActionButton: SpeedDial(
+        child: Icon(Icons.add),
+        children: [
+          SpeedDialChild(
+            label: "Add/update Password",
+            child: Icon(Icons.security),
+            onTap: () {
+              Modular.to.pushNamed(AddUpdateAccount.route);
+            },
           ),
-        ),
-        lockScreen(),
-      ],
+          SpeedDialChild(
+            label: "Add/update Note",
+            child: Icon(Icons.note_add),
+            onTap: () {
+              Modular.to.pushNamed(AddUpdateNote.route);
+            },
+          ),
+        ],
+      ),
     );
   }
 }

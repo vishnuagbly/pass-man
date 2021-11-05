@@ -1,8 +1,11 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_modular/flutter_modular.dart';
 import 'package:helpful_components/helpful_components.dart';
 import 'package:passman/utils/utils.dart';
+
+import 'home.dart';
 
 Widget lockScreen() => LockScreenWeb();
 
@@ -20,11 +23,16 @@ class _LockScreenWebState extends State<LockScreenWeb> {
   void initState() {
     if (AuthStorage.isTokenValid()) _authorized = true;
     if (!AuthStorage.mPassExists()) _authorized = true;
+    if (_authorized) AuthStorage.reIssueToken();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_authorized)
+      WidgetsBinding.instance!.addPostFrameCallback((_) {
+        Modular.to.pushReplacementNamed(HomeScreen.route);
+      });
     return _authorized
         ? Container()
         : Scaffold(

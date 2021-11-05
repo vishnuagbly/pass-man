@@ -39,18 +39,19 @@ class EncryptedObject {
   }
 
   static Future<EncryptedObject> create(List<int> value, Secret secret,
-      [Cipher? _cipher]) async {
-    Cipher cipher = _cipher ?? defaultCipher;
-    final secretBox = await cipher.encrypt(
+      {Cipher? cipher, String? type}) async {
+    Cipher _cipher = cipher ?? defaultCipher;
+    final secretBox = await _cipher.encrypt(
       value,
       secretKey: SecretKey(secret.bytes),
-      nonce: cipher.newNonce(),
+      nonce: _cipher.newNonce(),
     );
 
     return EncryptedObject(
       secretBox: secretBox,
-      cipher: cipher,
+      cipher: _cipher,
       secretId: secret.id,
+      type: type,
     );
   }
 

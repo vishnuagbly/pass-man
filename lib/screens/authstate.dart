@@ -45,6 +45,6 @@ class _AuthStateState extends State<AuthState> {
   @override
   Widget build(BuildContext context) {
     if (user == null) return LoginScreen();
-    return (user!.displayName?.isEmpty ?? true) ? SignUpScreen() : HomeScreen();
+    return (user!.displayName?.isEmpty ?? true) ? SignUpScreen() : lockScreen();
   }
 }

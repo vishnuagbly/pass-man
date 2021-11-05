@@ -16,6 +16,8 @@ class Account {
   })  : assert(url.isNotEmpty && username.isNotEmpty && password.isNotEmpty),
         this.uuid = uuid ?? __uuid.v4();
 
+  factory Account.fromString(String text) => Account.fromMap(jsonDecode(text));
+
   factory Account.fromMap(Map<String, dynamic> _map) {
     assert(
         _map['uuid'] != null &&

@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:cryptography/cryptography.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:passman/objects/encrypted_object.dart';
@@ -25,6 +23,18 @@ class Secrets {
   late final Future<List<int>> superSecret;
   final Box _box;
 
+  Secrets._()
+      : superSecret = getSuperSecret().superSecret,
+        _box = Hive.box(boxName) {
+    _defaultSecretId = _getDefaultSecretIdIfExists();
+  }
+
+  static Secrets get instance {
+    if (_instance == null) _instance = Secrets._();
+
+    return _instance!;
+  }
+
   ///This is the Hive Key of the default Secret for the app, either been set
   ///by the user or automatically(i.e the first one in this case).
   String? _defaultSecretId;
@@ -34,39 +44,53 @@ class Secrets {
   ///
   /// To check if any secret exists in local storage check [totalSecrets].
   Future<Secret> get defaultSecret async {
+    print("getting default secret id");
     if (_defaultSecretId != null) {
-      final secret = _box.get(_defaultSecretId);
-      if (secret != null) return (await getSecret(__defaultSecretIdKey))!;
-
-      //Deleting the key and setting default to null in case its value is null.
+      final secret = await getSecret(_defaultSecretId!);
+      if (secret != null) return secret;
+      //if the secret at [_defaultSecretId] is corrupted than delete it.
       _box.delete(_defaultSecretId);
-      _defaultSecretId = null;
+      //We are later re-assigning the value to [_defaultSecretId] so to
+      //get next possible default value we have to delete current default id
+      //from local storage too.
+      _box.delete(__defaultSecretIdKey);
+
+      //Now re-setting the [_defaultSecretId] value if any more possible.
+      if (_getDefaultSecretIdIfExists() != _defaultSecretId) {
+        _defaultSecretId = _getDefaultSecretIdIfExists();
+        return defaultSecret;
+      }
     }
+    print("default secret id is null");
+
     _defaultSecretId = await _addAndGenerateSecret();
-    return (await getSecret(__defaultSecretIdKey))!;
+    _box.put(__defaultSecretIdKey, _defaultSecretId);
+    return (await getSecret(_defaultSecretId!))!;
   }
 
   Future<Secret?> getSecret(String id) async {
-    final encodedValueMap = _box.get(id);
-    if (encodedValueMap == null) return null;
+    try {
+      final encodedValueMap = _box.get(id);
+      if (encodedValueMap == null) return null;
 
-    final encData = EncryptedObject.fromMap(encodedValueMap);
-    final value = String.fromCharCodes(await encData.decryptData(
-      Secret(bytes: await superSecret),
-      force: true,
-    ));
+      final encData =
+          EncryptedObject.fromMap(Map<String, dynamic>.from(encodedValueMap));
+      final value = String.fromCharCodes(await encData.decryptData(
+        Secret(bytes: await superSecret),
+        force: true,
+      ));
 
-    Map<String, dynamic> secretMap = jsonDecode(value);
-    return Secret.fromMap(secretMap);
+      return Secret.fromString(value);
+    } catch (err) {
+      print(
+          "Looks like the secret is corrupted, will be automatically deleting it.");
+      print(err);
+      _box.delete(id);
+      return null;
+    }
   }
 
-  Secrets._()
-      : superSecret = getSuperSecret().superSecret,
-        _box = Hive.box(boxName) {
-    _getDefaultSecretIdIfExists().then((_) => _defaultSecretId = _);
-  }
-
-  static Future<String?> _getDefaultSecretIdIfExists() async {
+  static String? _getDefaultSecretIdIfExists() {
     final box = Hive.box(boxName);
     //Here instead of typecasting with [String] we are typecasting with
     //[String?] as [box.get()] can also return null in case the key does not
@@ -103,18 +127,20 @@ class Secrets {
     final _secret = await (await algorithm.newSecretKey()).extractBytes();
     final secret = Secret(bytes: _secret);
     final encSecretObj = await EncryptedObject.create(
-        secret.map.toString().codeUnits, Secret(bytes: await superSecret));
+        secret.toString().codeUnits, Secret(bytes: await superSecret));
 
-    Hive.box(boxName).put(
+    await Hive.box(boxName).put(
       secret.id,
       encSecretObj.map,
     );
     return secret.id;
   }
 
-  static Secrets get instance {
-    if (_instance == null) _instance = Secrets._();
-
-    return _instance!;
+  List<String> allSecretsIds() {
+    final List<String> ids = [];
+    _box.toMap().forEach((key, value) {
+      if (key != __defaultSecretIdKey && value != null) ids.add(key);
+    });
+    return ids;
   }
 }

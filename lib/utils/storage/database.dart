@@ -30,7 +30,7 @@ class Database {
     return _instance!;
   }
 
-  Future<void> add(EncryptedObject encryptedObject, [String? _key]) {
+  Future<void> add(EncryptedObject encryptedObject, [String? _key]) async {
     var key = _key ?? Uuid().v4();
 
     while (Hive.box(boxName).containsKey(key)) {
@@ -38,7 +38,7 @@ class Database {
       key = Uuid().v4();
     }
 
-    return Hive.box(boxName).put(key, encryptedObject.map);
+    Hive.box(boxName).put(key, encryptedObject.map);
   }
 
   ///This deletes the record/data from the [Database] box and add the
