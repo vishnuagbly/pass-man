@@ -29,7 +29,7 @@ class _AddUpdateAccountState extends ConsumerState<AddUpdateAccount> {
       _description = TextEditingController();
   bool hidePassword = true;
 
-  void onSubmit() {
+  void onSubmit() async {
     if (!(formKey.currentState?.validate() ?? false)) return;
     final account = Account(
       uuid: _uuid,
@@ -46,7 +46,7 @@ class _AddUpdateAccountState extends ConsumerState<AddUpdateAccount> {
       return;
     }
     //TODO: Add account ADD both locally and online logic
-    final accounts = ref.read(AccountsList.provider);
+    final accounts = ref.read(await AccountsList.provider);
     accounts.add(account);
   }
 

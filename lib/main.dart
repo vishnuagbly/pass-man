@@ -15,7 +15,7 @@ void main() async {
   await Hive.openBox<String>(AuthStorage.auth);
   await Hive.openBox(Secrets.boxName);
   await Hive.openBox<String>(Deleted.boxName);
-  await Hive.openBox<String>(Accounts.boxName);
+  await Hive.openBox<String>(Database.boxName);
   runApp(ProviderScope(child: ModularApp(module: AppModule(), child: MyApp())));
 }
 

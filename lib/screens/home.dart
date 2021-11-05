@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+import 'package:helpful_components/common_snapshot_responses.dart';
 import 'package:passman/objects/accounts_list.dart';
 import 'package:passman/screens/mpass.dart';
 import 'package:passman/utils/globals.dart';
@@ -14,7 +15,7 @@ import 'lock_screen.dart'
     if (dart.library.io) 'lock_screen_mobile.dart'
     if (dart.library.html) 'lock_screen_web.dart';
 
-class HomeScreen extends ConsumerStatefulWidget {
+class HomeScreen extends StatefulWidget {
   static const route = "/home";
 
   const HomeScreen({
@@ -22,14 +23,12 @@ class HomeScreen extends ConsumerStatefulWidget {
   }) : super(key: key);
 
   @override
-  ConsumerState createState() => _HomeScreenState();
+  State createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends ConsumerState<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
-    final _accountsList = ref.watch(AccountsList.provider);
-
     return Stack(
       children: [
         Scaffold(
@@ -52,33 +51,47 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ],
             ),
           ),
-          body: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: ListView.builder(
-              itemCount: _accountsList.accounts.values.length,
-              itemBuilder: (_, i) => Consumer(builder: (context, _ref, _) {
-                final _passProvider =
-                    _accountsList.accounts.values.toList()[i];
-                final _url =
-                    _ref.watch(_passProvider.select((value) => value.url));
-                return Card(
-                  child: InkWell(
-                    onTap: () {},
-                    child: Container(
-                      width: double.infinity,
-                      height: 100,
-                      child: Center(
-                        child: Text(
-                          _url,
-                          style: TextStyle(fontSize: 4.w),
+          body: FutureBuilder<AccountsListProvider>(
+              future: AccountsList.provider,
+              builder: (context, snapshot) {
+                return CommonAsyncSnapshotResponses(
+                  snapshot,
+                  builder: (AccountsListProvider _provider) => Consumer(
+                    builder: (_, ref, __) {
+                      final _accountsList = ref.watch(_provider);
+
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        child: ListView.builder(
+                          itemCount: _accountsList.accounts.values.length,
+                          itemBuilder: (_, i) =>
+                              Consumer(builder: (context, _ref, _) {
+                            final _passProvider =
+                                _accountsList.accounts.values.toList()[i];
+                            final _url = _ref.watch(
+                                _passProvider.select((value) => value.url));
+                            return Card(
+                              child: InkWell(
+                                onTap: () {},
+                                child: Container(
+                                  width: double.infinity,
+                                  height: 100,
+                                  child: Center(
+                                    child: Text(
+                                      _url,
+                                      style: TextStyle(fontSize: 4.w),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          }),
                         ),
-                      ),
-                    ),
+                      );
+                    },
                   ),
                 );
               }),
-            ),
-          ),
           floatingActionButton: SpeedDial(
             child: Icon(Icons.add),
             children: [

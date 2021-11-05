@@ -5,6 +5,7 @@ import 'package:uuid/uuid.dart';
 
 class Account {
   static final __uuid = Uuid();
+  static const typeName = 'account';
 
   Account({
     String? uuid,
@@ -53,7 +54,7 @@ class Account {
   @override
   int get hashCode => toString().hashCode;
 
-  Map<String, String> toMap() => {
+  Map<String, String> get map => {
         'uuid': uuid,
         'url': url,
         'username': username,
@@ -62,7 +63,7 @@ class Account {
       };
 
   @override
-  String toString() => jsonEncode(toMap());
+  String toString() => jsonEncode(map);
 }
 
 class AccountNotifier extends StateNotifier<Account> {
