@@ -9,12 +9,14 @@ typedef AccountProvider
 typedef AccountsListProvider = AutoDisposeChangeNotifierProvider<AccountsList>;
 
 class AccountsList extends ChangeNotifier {
-  final Map<String, AccountProvider> accounts = {};
+  final Map<String, AccountProvider> accounts;
   int encryptedAccounts;
 
-  static AutoDisposeChangeNotifierProvider<AccountsList>? _provider;
+  static AccountsListProvider? _provider;
+  static AccountsList? _instance;
 
-  AccountsList._(List<Account> accounts, [this.encryptedAccounts = 0]) {
+  AccountsList._(List<Account> accounts, [this.encryptedAccounts = 0])
+      : accounts = {} {
     accounts.forEach((account) => add(
           account,
           notify: false,
@@ -23,34 +25,50 @@ class AccountsList extends ChangeNotifier {
     print('unDecrypted Accounts: $encryptedAccounts');
   }
 
-  static Future<AccountsListProvider> get provider async {
-    print("getting accounts provider");
-    if (_provider == null) {
-      print("accounts provider is null");
-      int encAccounts = 0;
-      final List<Account> accounts = [];
-      final _data =
-          Database.instance.data.where((elem) => elem.type == Account.typeName);
+  AccountsList._copyWith(AccountsList accountsList)
+      : encryptedAccounts = accountsList.encryptedAccounts,
+        accounts = accountsList.accounts;
 
-      for (final elem in _data) {
-        final secret = await Secrets.instance.getSecret(elem.secretId);
-        if (secret == null) {
-          encAccounts++;
-          continue;
+  static Future<AccountsListProvider> get provider async {
+    if (_provider == null) {
+      if (_instance == null) {
+        int encAccounts = 0;
+        final List<Account> accounts = [];
+        final _data = Database.instance.data
+            .where((elem) => elem.type == Account.typeName);
+
+        for (final elem in _data) {
+          final secret = await Secrets.instance.getSecret(elem.secretId);
+          if (secret == null) {
+            encAccounts++;
+            continue;
+          }
+
+          accounts.add(Account.fromString(
+              String.fromCharCodes(await elem.decryptData(secret))));
         }
 
-        accounts.add(Account.fromString(
-            String.fromCharCodes(await elem.decryptData(secret))));
+        _instance = AccountsList._(accounts, encAccounts);
       }
 
-      //Here this function is being re-called on Hot Reload in debug mode still
-      //hasn't tested whether it is a problem but could be, as in debug mode on
-      //re-builds after adding accounts it is causing the newly added accounts
-      //disappear as the values of [accounts] and [encAccounts] used in this
-      //function will remain same.
-      //TODO: Fix the issue mentioned in above comments.
       _provider = ChangeNotifierProvider.autoDispose(
-          (ref) => AccountsList._(accounts, encAccounts));
+        //Here this function will be called each time we will access the
+        //[_provider] so, we cannot create the object inside this parameter with
+        //local variables with values asynchronously generated, as values for
+        //those will not be recomputed and we cannot put await calls inside this
+        //function so, instead we will be calling the [_copyWith] constructor
+        //on a private singleton instance, here a constructor is necessary as
+        //due to auto dispose, after disposing the object we could not re-listen
+        //the same instance.
+        (ref) {
+          //here we are re-assigning [_instance] so that, by accessing the
+          //[_provider] we will be accessing and updating the [_instance] only
+          //as on next invocation of this parameter new object which will be
+          //created, will be of the lastly updated [_instance].
+          _instance = AccountsList._copyWith(_instance!);
+          return _instance!;
+        },
+      );
     }
 
     return _provider!;

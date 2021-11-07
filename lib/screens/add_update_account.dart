@@ -48,6 +48,7 @@ class _AddUpdateAccountState extends ConsumerState<AddUpdateAccount> {
     //TODO: Add account ADD both locally and online logic
     final accounts = ref.read(await AccountsList.provider);
     accounts.add(account);
+    Navigator.pop(context);
   }
 
   @override
