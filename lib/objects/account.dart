@@ -1,6 +1,8 @@
 import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:passman/extensions/encryption.dart';
+import 'package:passman/utils/utils.dart';
 import 'package:uuid/uuid.dart';
 
 class Account {
@@ -15,8 +17,6 @@ class Account {
     this.description = '',
   })  : assert(url.isNotEmpty && username.isNotEmpty && password.isNotEmpty),
         this.uuid = uuid ?? __uuid.v4();
-
-  factory Account.fromString(String text) => Account.fromMap(jsonDecode(text));
 
   factory Account.fromMap(Map<String, dynamic> _map) {
     assert(
@@ -66,6 +66,9 @@ class Account {
 
   @override
   String toString() => jsonEncode(map);
+
+  Future<void> uploadToDatabase() async =>
+      Database.instance.upload(await map.toEncObj(Account.typeName), uuid);
 }
 
 class AccountNotifier extends StateNotifier<Account> {
@@ -76,6 +79,13 @@ class AccountNotifier extends StateNotifier<Account> {
 
   void update(Account account) {
     assert(account.uuid == state.uuid, 'Not same passwords');
+
+    final temp = state.map;
+
+    account
+        .uploadToDatabase()
+        .catchError((err) => state = Account.fromMap(temp));
+    //TODO: Add Firestore Logic
 
     state = account;
   }

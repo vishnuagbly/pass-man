@@ -1,3 +1,5 @@
+import 'package:hive_flutter/hive_flutter.dart';
+
 ///This box will contain all the deleted records uuids NOT encrypted.
 ///
 ///Note: These ids are/(should be) completely
@@ -13,4 +15,8 @@ class Deleted {
 
     return _instance!;
   }
+
+  Future<void> add(String id) => Hive.box(boxName).put(id, true);
+
+  Future<void> delete(String id) => Hive.box(boxName).delete(id);
 }

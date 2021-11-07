@@ -17,8 +17,6 @@ class Secret {
         this.created = created ?? DateTime.now(),
         this.updated = updated ?? DateTime.now();
 
-  factory Secret.fromString(String text) => Secret.fromMap(jsonDecode(text));
-
   factory Secret.fromMap(Map<String, dynamic> map) {
     return Secret(
       id: map['id'],

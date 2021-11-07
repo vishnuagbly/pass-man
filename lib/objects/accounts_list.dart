@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:passman/extensions/encryption.dart';
 import 'package:passman/objects/account.dart';
-import 'package:passman/objects/encrypted_object.dart';
 import 'package:passman/utils/utils.dart';
 
 typedef AccountProvider
@@ -24,31 +24,31 @@ class AccountsList extends ChangeNotifier {
   }
 
   static Future<AccountsListProvider> get provider async {
-    print("getting accounts provider");
     if (_provider == null) {
-      print("accounts provider is null");
       int encAccounts = 0;
       final List<Account> accounts = [];
-      final _data =
-          Database.instance.data.where((elem) => elem.type == Account.typeName);
+      final _data = Database.instance.data;
+      _data.removeWhere((key, elem) => elem.type != Account.typeName);
 
-      for (final elem in _data) {
+      // print('total secrets: ${Secrets.instance.allSecretsIds()}');
+      _data.forEach((key, elem) async {
+        // print('secret id: ${elem.secretId}');
         final secret = await Secrets.instance.getSecret(elem.secretId);
         if (secret == null) {
-          encAccounts++;
-          continue;
+          //The below line is temporary for until we have added the
+          //functionality to show the unencrypted passwords and also the
+          //functionality to delete them.
+          //TODO: Remove below line after above comment is implemented.
+          Database.instance.delete(key).catchError((err) {
+            print("error: $err");
+            encAccounts++;
+          });
+          return;
         }
 
-        accounts.add(Account.fromString(
-            String.fromCharCodes(await elem.decryptData(secret))));
-      }
+        accounts.add(Account.fromMap(await elem.decryptToMap(secret)));
+      });
 
-      //Here this function is being re-called on Hot Reload in debug mode still
-      //hasn't tested whether it is a problem but could be, as in debug mode on
-      //re-builds after adding accounts it is causing the newly added accounts
-      //disappear as the values of [accounts] and [encAccounts] used in this
-      //function will remain same.
-      //TODO: Fix the issue mentioned in above comments.
       _provider = ChangeNotifierProvider.autoDispose(
           (ref) => AccountsList._(accounts, encAccounts));
     }
@@ -65,7 +65,7 @@ class AccountsList extends ChangeNotifier {
         !accounts.containsKey(account.uuid), 'Same id password already exists');
 
     if (!onlyInMemory)
-      _addToDatabase(account).catchError((err) {
+      account.uploadToDatabase().catchError((err) {
         print(err);
         remove(account.uuid);
       });
@@ -78,17 +78,10 @@ class AccountsList extends ChangeNotifier {
     if (notify) notifyListeners();
   }
 
-  Future<void> _addToDatabase(Account account) async {
-    final secret = await Secrets.instance.defaultSecret;
-    print("added to database with secretId: ${secret.id}");
-    final encObj = await EncryptedObject.create(
-        account.toString().codeUnits, secret,
-        type: Account.typeName);
-    return Database.instance.add(encObj, account.uuid);
-  }
-
   void remove(String uuid) {
-    //TODO: Add logic to remove account from local storage and firestore.
+    //TODO: Add logic to remove account from firestore.
+    //TODO: Remove [completeDelete] after the above is implemented.
+    Database.instance.delete(uuid, completeDelete: true);
     accounts.remove(uuid);
     print("Account Removed!");
     notifyListeners();

@@ -23,6 +23,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final _provider = AccountsList.provider;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -46,7 +48,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
       body: FutureBuilder<AccountsListProvider>(
-          future: AccountsList.provider,
+          future: _provider,
           builder: (context, snapshot) {
             return CommonAsyncSnapshotResponses(
               snapshot,

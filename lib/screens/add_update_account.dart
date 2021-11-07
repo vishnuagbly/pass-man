@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_modular/flutter_modular.dart';
 import 'package:flutter_password_strength/flutter_password_strength.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:passman/objects/account.dart';
@@ -40,12 +41,10 @@ class _AddUpdateAccountState extends ConsumerState<AddUpdateAccount> {
     );
     final accountProvider = widget.account;
     if (accountProvider != null) {
-      //TODO: Add account UPDATE both locally and online logic
       final accountNotifier = ref.read(accountProvider.notifier);
       accountNotifier.update(account);
       return;
     }
-    //TODO: Add account ADD both locally and online logic
     final accounts = ref.read(await AccountsList.provider);
     accounts.add(account);
   }
@@ -143,7 +142,10 @@ class _AddUpdateAccountState extends ConsumerState<AddUpdateAccount> {
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: onSubmit,
+        onPressed: () {
+          onSubmit();
+          Modular.to.pop();
+        },
         label: Text("Submit"),
       ),
     );

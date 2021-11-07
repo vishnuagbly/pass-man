@@ -1,6 +1,6 @@
-import 'package:flutter/services.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:passman/objects/encrypted_object.dart';
+import 'package:passman/utils/storage/deleted.dart';
 import 'package:uuid/uuid.dart';
 
 //Creating this as a singleton for the same reason as for the [Secrets] class
@@ -18,10 +18,10 @@ class Database {
   static const String boxName = 'AccountStorageBox';
   static Database? _instance;
 
-  List<EncryptedObject> get data => Hive.box(boxName)
-      .values
-      .map((elem) => EncryptedObject.fromMap(Map<String, dynamic>.from(elem)))
-      .toList();
+  Map<String, EncryptedObject> get data => Hive.box(boxName).toMap().map(
+        (key, elem) => MapEntry(
+            key, EncryptedObject.fromMap(Map<String, dynamic>.from(elem))),
+      );
 
   Database._();
 
@@ -30,11 +30,16 @@ class Database {
     return _instance!;
   }
 
-  Future<void> add(EncryptedObject encryptedObject, [String? _key]) async {
+  ///Note: This function will overwrite if the provided [key] already exists in
+  ///the [Database] box.
+  Future<void> upload(EncryptedObject encryptedObject, [String? _key]) async {
     var key = _key ?? Uuid().v4();
 
     while (Hive.box(boxName).containsKey(key)) {
-      if (_key != null) throw PlatformException(code: 'KEY_ALREADY_EXISTS');
+      if (_key != null) {
+        print('Over-writing the data at key in Database: $key');
+        break;
+      }
       key = Uuid().v4();
     }
 
@@ -43,7 +48,12 @@ class Database {
 
   ///This deletes the record/data from the [Database] box and add the
   ///(Hive key)/(Data id) to the [Deleted] box.
-  Future<void> delete(String? key) async {
-    //TODO: Add logic for this.
+  ///
+  /// If [completeDelete] is true then, the record will be deleted
+  /// from the [Database] box, and nothing is added to [Deleted] box. i.e
+  /// it is completely deleted from the local storage, with no trace left.
+  Future<void> delete(String key, {bool completeDelete = false}) async {
+    await Hive.box(boxName).delete(key);
+    if (!completeDelete) await Deleted.instance.add(key);
   }
 }

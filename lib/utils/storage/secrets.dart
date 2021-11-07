@@ -1,5 +1,6 @@
 import 'package:cryptography/cryptography.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:passman/extensions/extensions.dart';
 import 'package:passman/objects/encrypted_object.dart';
 import 'package:passman/objects/secret.dart';
 import 'package:passman/utils/storage/super_secret_key.dart';
@@ -75,12 +76,11 @@ class Secrets {
 
       final encData =
           EncryptedObject.fromMap(Map<String, dynamic>.from(encodedValueMap));
-      final value = String.fromCharCodes(await encData.decryptData(
+
+      return Secret.fromMap(await encData.decryptToMap(
         Secret(bytes: await superSecret),
         force: true,
       ));
-
-      return Secret.fromString(value);
     } catch (err) {
       print(
           "Looks like the secret is corrupted, will be automatically deleting it.");
@@ -136,9 +136,12 @@ class Secrets {
     return secret.id;
   }
 
-  List<String> allSecretsIds() {
+  Future<void> remove(String id) => _box.delete(id);
+
+  List<String> allSecretsIds({bool debug = false}) {
     final List<String> ids = [];
     _box.toMap().forEach((key, value) {
+      if (debug) print("key: $key value: $value");
       if (key != __defaultSecretIdKey && value != null) ids.add(key);
     });
     return ids;
