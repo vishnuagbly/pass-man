@@ -36,8 +36,8 @@ class AccountsList extends ChangeNotifier {
         final secret = await Secrets.instance.getSecret(elem.secretId);
         if (secret == null) {
           //The below line is temporary for until we have added the
-          //functionality to show the unencrypted passwords and also the
-          //functionality to delete them.
+          //functionality to show the unencrypted passwords, the
+          //functionality to delete them, the whole firestore system.
           //TODO: Remove below line after above comment is implemented.
           Database.instance.delete(key).catchError((err) {
             print("error: $err");

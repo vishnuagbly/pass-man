@@ -71,7 +71,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         return Card(
                           key: key,
                           child: InkWell(
-                            //TODO: Add Remove Functionality
                             onTap: () {
                               Modular.to.pushNamed(
                                 AddUpdateAccount.route,
@@ -105,7 +104,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                         ),
                                       ));
                             },
-
                             child: Container(
                               width: double.infinity,
                               height: 100,
