@@ -36,7 +36,7 @@ dependencies:
   flutter_riverpod: ^1.0.0-dev.7
   firebase_dynamic_links: ^2.0.9
   local_auth: ^1.1.8
-  helpful_components: ^0.0.1
+  helpful_components: ^0.0.2
   hive: ^2.0.4
   hive_flutter: ^1.1.0
   cryptography: ^2.0.2

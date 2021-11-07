@@ -4,6 +4,7 @@ import 'package:flutter_modular/flutter_modular.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:helpful_components/common_snapshot_responses.dart';
+import 'package:helpful_components/helpful_components.dart';
 import 'package:passman/objects/accounts_list.dart';
 import 'package:passman/screens/mpass.dart';
 import 'package:passman/utils/globals.dart';
@@ -62,19 +63,49 @@ class _HomeScreenState extends State<HomeScreen> {
                       itemCount: _accountsList.accounts.values.length,
                       itemBuilder: (_, i) =>
                           Consumer(builder: (context, _ref, _) {
-                        final _passProvider =
+                        final _accProvider =
                             _accountsList.accounts.values.toList()[i];
                         final _url = _ref
-                            .watch(_passProvider.select((value) => value.url));
+                            .watch(_accProvider.select((value) => value.url));
+                        final key = GlobalKey();
                         return Card(
+                          key: key,
                           child: InkWell(
                             //TODO: Add Remove Functionality
                             onTap: () {
                               Modular.to.pushNamed(
                                 AddUpdateAccount.route,
-                                arguments: _passProvider,
+                                arguments: _accProvider,
                               );
                             },
+                            onLongPress: () {
+                              showPopup(
+                                  showBarrierColor: true,
+                                  context: context,
+                                  builder: (overlayEntry) => Popup(
+                                        parentKey: key,
+                                        child: Card(
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: TextButton(
+                                              onPressed: () {
+                                                _ref.read(_provider).remove(
+                                                    _ref.read(_accProvider));
+                                                overlayEntry.remove();
+                                              },
+                                              child: Text(
+                                                'Delete',
+                                                style: Globals.kBodyText1Style
+                                                    .copyWith(
+                                                  color: Colors.red,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ));
+                            },
+
                             child: Container(
                               width: double.infinity,
                               height: 100,

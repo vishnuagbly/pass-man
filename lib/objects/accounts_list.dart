@@ -67,7 +67,7 @@ class AccountsList extends ChangeNotifier {
     if (!onlyInMemory)
       account.uploadToDatabase().catchError((err) {
         print(err);
-        remove(account.uuid);
+        remove(account);
       });
     //TODO: Add logic to add account in Firestore.
     accounts[account.uuid] =
@@ -78,11 +78,16 @@ class AccountsList extends ChangeNotifier {
     if (notify) notifyListeners();
   }
 
-  void remove(String uuid) {
+  void remove(Account account) {
     //TODO: Add logic to remove account from firestore.
     //TODO: Remove [completeDelete] after the above is implemented.
-    Database.instance.delete(uuid, completeDelete: true);
-    accounts.remove(uuid);
+    Database.instance
+        .delete(account.uuid, completeDelete: true)
+        .catchError((err) {
+      print(err);
+      add(account);
+    });
+    accounts.remove(account.uuid);
     print("Account Removed!");
     notifyListeners();
   }
