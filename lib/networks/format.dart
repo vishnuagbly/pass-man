@@ -42,6 +42,13 @@ abstract class Format {
     return _doc.get().then(_convert);
   }
 
+  static Map<String, String> toAccountIdDocId(
+      Map<String, List<String>> format) {
+    Map<String, String> res = {};
+    format.forEach((key, values) => values.forEach((val) => res[val] = key));
+    return res;
+  }
+
   static Map<String, List<String>> _converter(Map<String, dynamic> _map) {
     Map<String, List<String>> res = {};
     _map.forEach((key, val) => res[key] = List<String>.from(val));

@@ -20,16 +20,12 @@ class AccountsNetwork {
     return Syncer.collection.doc(uid).collection('accounts');
   }
 
-  Future<Map<String, Account?>> doc(String docId) =>
-      _collection.doc(docId).get().then((snapshot) async {
-        final _data = snapshot.data() ?? {};
-        Map<String, Account?> res = {};
-        for (final key in _data.keys)
-          res[key] = await _convert(Map<String, dynamic>.from(_data[key]!));
-        return res;
-      });
+  static Future<Account?> account(String docId, String accountId) async =>
+      values({
+        docId: Set.from([accountId])
+      }).then((res) => res[docId]);
 
-  Future<Map<String, Account?>> values(
+  static Future<Map<String, Account?>> values(
       Map<String, Set<String>> accounts) async {
     Map<String, Account?> res = {};
     for (final key in accounts.keys) {
@@ -40,13 +36,22 @@ class AccountsNetwork {
     return res;
   }
 
+  static Future<Map<String, Account?>> doc(String docId) =>
+      _collection.doc(docId).get().then((snapshot) async {
+        final _data = snapshot.data() ?? {};
+        Map<String, Account?> res = {};
+        for (final key in _data.keys)
+          res[key] = await _convert(Map<String, dynamic>.from(_data[key]!));
+        return res;
+      });
+
   ///Can be used for add, edit and delete operations. To delete an account
   ///set the value as null in [encObjs].
   ///
   ///Here, [format] will be the format received at the beginning of the
   ///transaction, this is to check whether the docId already exists or not, and
   ///perform update accordingly.
-  void update(String docId, Map<String, EncryptedObject?> encObjs,
+  static void update(String docId, Map<String, EncryptedObject?> encObjs,
       Transaction transaction, Map<String, List<String>> format) {
     Map<String, dynamic> toUpdate = {};
     for (final key in encObjs.keys) {
@@ -66,7 +71,7 @@ class AccountsNetwork {
     transaction.set(_collection.doc(docId), toUpdate);
   }
 
-  Future<Account?> _convert(Map<String, dynamic> _encryptedMap) async {
+  static Future<Account?> _convert(Map<String, dynamic> _encryptedMap) async {
     final encObj =
         EncryptedObject.fromMap(Map<String, dynamic>.from(_encryptedMap));
     final secret = await Secrets.instance.getSecret(encObj.secretId);

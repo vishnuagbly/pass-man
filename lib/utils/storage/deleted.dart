@@ -16,7 +16,10 @@ class Deleted {
     return _instance!;
   }
 
-  Future<void> add(String id) => Hive.box(boxName).put(id, true);
+  DateTime? find(String id) => Hive.box(boxName).get(id) as DateTime?;
+
+  Future<void> upload(String id, [DateTime? dateTime]) =>
+      Hive.box(boxName).put(id, dateTime ?? DateTime.now());
 
   Future<void> delete(String id) => Hive.box(boxName).delete(id);
 }

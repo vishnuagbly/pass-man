@@ -52,8 +52,9 @@ class Database {
   /// If [completeDelete] is true then, the record will be deleted
   /// from the [Database] box, and nothing is added to [Deleted] box. i.e
   /// it is completely deleted from the local storage, with no trace left.
-  Future<void> delete(String key, {bool completeDelete = false}) async {
+  Future<void> delete(String key,
+      {bool completeDelete = false, DateTime? dateTime}) async {
     await Hive.box(boxName).delete(key);
-    if (!completeDelete) await Deleted.instance.add(key);
+    if (!completeDelete) await Deleted.instance.upload(key, dateTime);
   }
 }
