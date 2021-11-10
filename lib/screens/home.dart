@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:helpful_components/common_snapshot_responses.dart';
 import 'package:helpful_components/helpful_components.dart';
+import 'package:passman/networks/syncer.dart';
 import 'package:passman/objects/accounts_list.dart';
 import 'package:passman/screens/mpass.dart';
 import 'package:passman/utils/globals.dart';
@@ -56,6 +57,7 @@ class _HomeScreenState extends State<HomeScreen> {
               builder: (AccountsListProvider _provider) => Consumer(
                 builder: (_, ref, __) {
                   final _accountsList = ref.watch(_provider);
+                  Syncer.instance.then((provider) => ref.watch(provider));
 
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -79,30 +81,50 @@ class _HomeScreenState extends State<HomeScreen> {
                             },
                             onLongPress: () {
                               showPopup(
-                                  showBarrierColor: true,
-                                  context: context,
-                                  builder: (overlayEntry) => Popup(
-                                        parentKey: key,
-                                        child: Card(
-                                          child: Padding(
-                                            padding: const EdgeInsets.all(8.0),
-                                            child: TextButton(
-                                              onPressed: () {
-                                                _ref.read(_provider).remove(
-                                                    _ref.read(_accProvider));
-                                                overlayEntry.remove();
-                                              },
-                                              child: Text(
-                                                'Delete',
-                                                style: Globals.kBodyText1Style
-                                                    .copyWith(
-                                                  color: Colors.red,
-                                                ),
+                                showBarrierColor: true,
+                                context: context,
+                                builder: (overlayEntry) => Popup(
+                                  parentKey: key,
+                                  child: Card(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Column(
+                                        children: [
+                                          TextButton(
+                                            onPressed: () {
+                                              _ref.read(_provider).remove(
+                                                  _ref.read(_accProvider));
+                                              overlayEntry.remove();
+                                            },
+                                            child: Text(
+                                              'Delete',
+                                              style: Globals.kBodyText1Style
+                                                  .copyWith(
+                                                color: Colors.red,
                                               ),
                                             ),
                                           ),
-                                        ),
-                                      ));
+                                          TextButton(
+                                            onPressed: () {
+                                              _ref.read(_provider).remove(
+                                                  _ref.read(_accProvider),
+                                                  completeDelete: true);
+                                              overlayEntry.remove();
+                                            },
+                                            child: Text(
+                                              'Full Delete',
+                                              style: Globals.kBodyText1Style
+                                                  .copyWith(
+                                                color: Colors.red,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              );
                             },
                             child: Container(
                               width: double.infinity,

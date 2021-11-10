@@ -23,12 +23,12 @@ class Changes {
   static Stream<Map<String, DateTime>> get stream =>
       _doc.snapshots().map((snapshot) {
         return (snapshot.data() ?? {})
-            .map((key, value) => MapEntry(key, value.toDate()));
+            .map((key, value) => MapEntry(key, DateTime.parse(value)));
       });
 
   static Future<Map<String, DateTime>> get value =>
       _doc.get().then((snapshot) => (snapshot.data() ?? {})
-          .map((key, value) => MapEntry(key, value.toDate())));
+          .map((key, value) => MapEntry(key, DateTime.parse(value))));
 
   ///Can be used for add, edit and delete operations. For delete set value for
   ///the respective key to null in [map].
@@ -38,7 +38,7 @@ class Changes {
       if (map[key] == null)
         res[key] = FieldValue.delete();
       else
-        res[key] = map[key];
+        res[key] = map[key]?.toIso8601String();
     }
     transaction.update(_doc, res);
   }

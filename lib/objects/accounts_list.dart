@@ -69,7 +69,6 @@ class AccountsList extends ChangeNotifier {
         print(err);
         remove(account);
       });
-    //TODO: Add logic to add account in Firestore.
     accounts[account.uuid] =
         StateNotifierProvider.autoDispose<AccountNotifier, Account>(
       (ref) => AccountNotifier(account),
@@ -78,11 +77,10 @@ class AccountsList extends ChangeNotifier {
     if (notify) notifyListeners();
   }
 
-  void remove(Account account) {
-    //TODO: Add logic to remove account from firestore.
+  void remove(Account account, {bool completeDelete = false}) {
     //TODO: Remove [completeDelete] after the above is implemented.
     Database.instance
-        .delete(account.uuid, completeDelete: true)
+        .delete(account.uuid, completeDelete: completeDelete)
         .catchError((err) {
       print(err);
       add(account);

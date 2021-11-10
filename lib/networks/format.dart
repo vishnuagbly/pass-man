@@ -57,44 +57,80 @@ abstract class Format {
 
   ///This function can be used to perform add, edit and delete all of them.
   ///
+  /// In parameter [fileIds], provide a map where key will be the fileIds and
+  /// the boolean value would be to delete or not the item.
+  ///
   ///Here since we need to provide the [format] gotten using transaction, as in
   ///case of transaction we need to perform all read operations first, therefore
   ///they cannot be performed inside a same function.
   ///
   /// This function returns the [docId] used. This is helpful to get the
-  /// auto selected value of [docId] used by the function in case if it was not
-  /// specified in the parameters.
-  static String? update(
-    String fileId,
-    Transaction transaction,
-    Map<String, List<String>> format, {
-    bool delete = false,
-    String? docId,
+  /// auto selected value of [docId] used by the function.
+  static Map<String, String> update(
+    final Map<String, bool> fileIds,
+    final Transaction transaction,
+    final Map<String, List<String>> _format, {
+    final int maxElementsInDoc = 20,
   }) {
-    Map<String, List<String>> toUpdate = {};
+    final format = deepClone(_format);
+    final Map<String, List<String>> toUpdate = {};
+    final Map<String, bool> done =
+        fileIds.map((key, value) => MapEntry(key, false));
+    final Map<String, String> docIds = {};
+    List<List<dynamic>> lengths = [];
+
     for (final key in format.keys) {
+      List<String> idsFound = [];
       int total = format[key]!.fold(0, (previousValue, element) {
-        if (element == fileId) previousValue++;
+        if (fileIds.containsKey(element)) {
+          previousValue++;
+          if (!done[element]!) {
+            if (!fileIds[element]!) idsFound.add(element);
+
+            docIds[element] = key;
+            done[element] = true;
+          }
+        }
         return previousValue;
       });
-      if (key == docId || total > 0)
-        format[key] = [
-          ...format[key]!.where((elem) => elem != fileId).toList(),
-          if (key == docId && !delete) fileId,
-        ];
+
+      if (total > 0)
+        format[key] = format[key]!
+            .where((elem) => !fileIds.containsKey(elem))
+            .toList()
+          ..addAll(idsFound);
+
       toUpdate[key] = format[key]!;
+      lengths.add([key, format[key]!.length]);
     }
-    if (docId == null && !delete) {
-      String? _min;
-      for (final key in format.keys) {
-        if (_min == null || format[key]!.length < format[_min]!.length)
-          _min = key;
+    lengths.sort((first, second) => first[1].compareTo(second[1]));
+
+    int i = 0;
+    outerLoop:
+    for (final key in done.keys) {
+      if (done[key]!) continue;
+      if (fileIds[key]!) continue;
+      while (true) {
+        while (i < lengths.length) {
+          if (lengths[i][1] < maxElementsInDoc) {
+            lengths[i][1]++;
+            toUpdate[lengths[i][0]] = (toUpdate[lengths[i][0]] ?? [])..add(key);
+            docIds[key] = lengths[i][0];
+            continue outerLoop;
+          }
+          i++;
+        }
+        lengths.add([Uuid().v1(), 0]);
       }
-      if (_min == null) _min = Uuid().v1();
-      toUpdate[_min] = [...format[_min]!, fileId];
-      docId = _min;
     }
+
     transaction.update(_doc, toUpdate);
-    return docId;
+    return docIds;
+  }
+
+  static Map<String, List<String>> deepClone(Map<String, List<String>> format) {
+    Map<String, List<String>> res = {};
+    format.forEach((key, value) => res[key] = List<String>.from(value));
+    return res;
   }
 }

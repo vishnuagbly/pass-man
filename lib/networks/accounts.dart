@@ -58,7 +58,7 @@ class AccountsNetwork {
       if (encObjs[key] == null)
         toUpdate[key] = FieldValue.delete();
       else
-        toUpdate[key] = encObjs[key];
+        toUpdate[key] = encObjs[key]?.map;
     }
     if (format.containsKey(docId)) {
       transaction.update(_collection.doc(docId), toUpdate);

@@ -103,7 +103,6 @@ class AccountNotifier extends StateNotifier<Account> {
     account
         .uploadToDatabase()
         .catchError((err) => state = Account.fromMap(temp));
-    //TODO: Add Firestore Logic
 
     state = account;
   }

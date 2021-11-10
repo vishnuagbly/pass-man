@@ -20,9 +20,9 @@ class DeletedNetworks {
     if (snapshot.data() == null) await _doc.set({});
   }
 
-  static Future<Map<String, DateTime>> get data => _doc
-      .get()
-      .then((value) => Map<String, DateTime>.from(value.data() ?? {}));
+  static Future<Map<String, DateTime>> get data =>
+      _doc.get().then((value) => Map<String, DateTime>.from((value.data() ?? {})
+          .map((key, value) => MapEntry(key, DateTime.parse(value)))));
 
   static Future<DateTime?> account(String id) => data.then((_map) => _map[id]);
 
@@ -34,7 +34,7 @@ class DeletedNetworks {
       if (map[key] == null)
         res[key] = FieldValue.delete();
       else
-        res[key] = map[key];
+        res[key] = map[key]?.toIso8601String();
     }
     transaction.update(_doc, res);
   }
