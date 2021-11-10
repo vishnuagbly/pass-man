@@ -104,21 +104,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                               ),
                                             ),
                                           ),
-                                          TextButton(
-                                            onPressed: () {
-                                              _ref.read(_provider).remove(
-                                                  _ref.read(_accProvider),
-                                                  completeDelete: true);
-                                              overlayEntry.remove();
-                                            },
-                                            child: Text(
-                                              'Full Delete',
-                                              style: Globals.kBodyText1Style
-                                                  .copyWith(
-                                                color: Colors.red,
-                                              ),
-                                            ),
-                                          ),
                                         ],
                                       ),
                                     ),
