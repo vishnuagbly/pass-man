@@ -1,24 +1,67 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_modular/flutter_modular.dart';
 import 'package:flutter_password_strength/flutter_password_strength.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:passman/objects/account.dart';
+import 'package:passman/objects/accounts_list.dart';
 import 'package:passman/utils/globals.dart';
 import 'package:passman/utils/utils.dart';
 
-class AddUpdatePassword extends StatefulWidget {
+class AddUpdateAccount extends ConsumerStatefulWidget {
   static const route = '/add-update-password';
 
-  const AddUpdatePassword({Key? key}) : super(key: key);
+  const AddUpdateAccount({
+    Key? key,
+    this.account,
+  }) : super(key: key);
+
+  final AccountProvider? account;
 
   @override
-  _AddUpdatePasswordState createState() => _AddUpdatePasswordState();
+  _AddUpdateAccountState createState() => _AddUpdateAccountState();
 }
 
-class _AddUpdatePasswordState extends State<AddUpdatePassword> {
+class _AddUpdateAccountState extends ConsumerState<AddUpdateAccount> {
   final formKey = GlobalKey<FormState>();
-  final _passwordController = TextEditingController();
+  late final String? _uuid;
+  final _password = TextEditingController(),
+      _username = TextEditingController(),
+      _url = TextEditingController(),
+      _description = TextEditingController();
   bool hidePassword = true;
 
-  void onSubmit() {
-    if (!formKey.currentState!.validate()) return;
+  void onSubmit() async {
+    if (!(formKey.currentState?.validate() ?? false)) return;
+    final account = Account(
+      uuid: _uuid,
+      url: _url.text,
+      password: _password.text,
+      username: _username.text,
+      description: _description.text,
+    );
+    final accountProvider = widget.account;
+    if (accountProvider != null) {
+      final accountNotifier = ref.read(accountProvider.notifier);
+      accountNotifier.update(account);
+      return;
+    }
+    final accounts = ref.read(await AccountsList.provider);
+    accounts.add(account);
+  }
+
+  @override
+  void initState() {
+    final accountProvider = widget.account;
+    if (accountProvider != null) {
+      final account = ref.read(accountProvider);
+      _uuid = account.uuid;
+      _password.text = account.password;
+      _username.text = account.username;
+      _url.text = account.url;
+      _description.text = account.description;
+    } else
+      _uuid = null;
+    super.initState();
   }
 
   @override
@@ -37,21 +80,23 @@ class _AddUpdatePasswordState extends State<AddUpdatePassword> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 TextFormField(
+                  controller: _url,
                   decoration: InputDecoration(
                     hintText: 'URL',
                   ),
-                  validator: Globals.kCommonValidator,
+                  validator: Globals.kFieldRequiredValidator,
                 ),
                 Globals.kSizedBox,
                 TextFormField(
+                  controller: _username,
                   decoration: InputDecoration(
                     hintText: 'Username/Email',
                   ),
-                  validator: Globals.kCommonValidator,
+                  validator: Globals.kFieldRequiredValidator,
                 ),
                 Globals.kSizedBox,
                 TextFormField(
-                  controller: _passwordController,
+                  controller: _password,
                   decoration: InputDecoration(
                     hintText: 'Password',
                     suffixIcon: IconButton(
@@ -69,25 +114,26 @@ class _AddUpdatePasswordState extends State<AddUpdatePassword> {
                     setState(() {});
                   },
                   obscureText: hidePassword,
-                  validator: Globals.kCommonValidator,
+                  validator: Globals.kFieldRequiredValidator,
                 ),
                 Globals.kSizedBox,
                 AnimatedOpacity(
-                  opacity: _passwordController.text.isEmpty ? 0 : 1,
+                  opacity: _password.text.isEmpty ? 0 : 1,
                   duration: Duration(milliseconds: 300),
                   child: FlutterPasswordStrength(
-                    password: _passwordController.text,
+                    password: _password.text,
                   ),
                 ),
                 Globals.kSizedBox,
                 TextFormField(
+                  controller: _description,
                   decoration: InputDecoration(
                     hintText: 'Description...',
                   ),
                   textInputAction: TextInputAction.newline,
                   minLines: 5,
                   maxLines: 5,
-                  validator: Globals.kCommonValidator,
+                  validator: Globals.kFieldRequiredValidator,
                 ),
                 Globals.kSizedBox,
               ],
@@ -96,7 +142,10 @@ class _AddUpdatePasswordState extends State<AddUpdatePassword> {
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: onSubmit,
+        onPressed: () {
+          onSubmit();
+          Modular.to.pop();
+        },
         label: Text("Submit"),
       ),
     );

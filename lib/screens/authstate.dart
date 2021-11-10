@@ -27,7 +27,7 @@ class _AuthStateState extends State<AuthState> {
       //if user is logged in, re-issue token and no-need to change screen, as it
       //will get changed after the animation.
       if (event != null) {
-        Storage.reIssueToken();
+        AuthStorage.reIssueToken();
         return;
       }
       safeSetState(() => user = event);
@@ -45,6 +45,6 @@ class _AuthStateState extends State<AuthState> {
   @override
   Widget build(BuildContext context) {
     if (user == null) return LoginScreen();
-    return (user!.displayName?.isEmpty ?? true) ? SignUpScreen() : HomeScreen();
+    return (user!.displayName?.isEmpty ?? true) ? SignUpScreen() : lockScreen();
   }
 }

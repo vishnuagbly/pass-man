@@ -14,12 +14,6 @@ extension GlobalValue on num {
   double get h => (Globals.rawScreenHeight * this) / 100;
 }
 
-enum SupportState {
-  unknown,
-  supported,
-  unsupported,
-}
-
 abstract class Globals {
   //Screen Resolution
   static double get rawScreenHeight =>
@@ -51,11 +45,6 @@ abstract class Globals {
   static final kHeading2Style = GoogleFonts.montserrat(fontSize: 5.w);
   static final kHeading1Style = GoogleFonts.montserrat(fontSize: 6.w);
 
-  static getColorTextStyle(Color color) => GoogleFonts.montserrat(
-        fontSize: 4.5.w,
-        color: color,
-      );
-
   static final kInputDecorationTheme = InputDecorationTheme(
     fillColor: ColorsUtils.kElevationColor,
     filled: true,
@@ -75,36 +64,6 @@ abstract class Globals {
 
   static const kScreenPadding = const EdgeInsets.all(20);
 
-  /// Global Classroom Text
-  static final kClassroomText = RichText(
-    text: TextSpan(
-      text: 'C',
-      style: Globals.getColorTextStyle(Colors.green),
-      children: [
-        TextSpan(
-          text: 'l',
-          style: Globals.getColorTextStyle(Colors.blue),
-        ),
-        TextSpan(
-          text: 'a',
-          style: Globals.getColorTextStyle(Colors.orange),
-        ),
-        TextSpan(
-          text: 's',
-          style: Globals.getColorTextStyle(Colors.red),
-        ),
-        TextSpan(
-          text: 's',
-          style: Globals.getColorTextStyle(Colors.green),
-        ),
-        TextSpan(
-          text: 'room',
-          style: Globals.getColorTextStyle(Colors.white),
-        ),
-      ],
-    ),
-  );
-
   static final kBackButton = IconButton(
     onPressed: () {
       Modular.to.pop();
@@ -112,7 +71,7 @@ abstract class Globals {
     icon: Icon(Icons.chevron_left),
   );
 
-  static final String? Function(String?) kCommonValidator = (_) {
+  static final String? Function(String?) kFieldRequiredValidator = (_) {
     if (_?.isEmpty ?? true) return 'This Field is required';
   };
 }

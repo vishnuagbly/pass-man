@@ -3,16 +3,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'config_route.dart' if (dart.library.html) 'config_route_web.dart';
+import 'package:passman/screens/authstate.dart';
+import 'config_app.dart' if (dart.library.html) 'config_route_web.dart';
 
 import './utils/utils.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  configureApp();
+  await configureApp();
   await Firebase.initializeApp();
   await Hive.initFlutter();
-  await Hive.openBox(Storage.auth);
+  await Hive.openBox(AuthStorage.auth);
+  await Hive.openBox(Secrets.boxName);
+  await Hive.openBox(Deleted.boxName);
+  await Hive.openBox(Database.boxName);
   runApp(ProviderScope(child: ModularApp(module: AppModule(), child: MyApp())));
 }
 
@@ -24,48 +28,48 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Pass-Man',
       theme: ThemeData(
-        appBarTheme: AppBarTheme(
-          backgroundColor: ColorsUtils.kBackgroundColor,
-          elevation: 0.0,
-          titleTextStyle: Globals.kHeading2Style,
-          titleSpacing: 35,
-        ),
-        snackBarTheme: SnackBarThemeData(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.vertical(top: Radius.circular(10.w)),
+          appBarTheme: AppBarTheme(
+            backgroundColor: ColorsUtils.kBackgroundColor,
+            elevation: 0.0,
+            titleTextStyle: Globals.kHeading2Style,
+            titleSpacing: 35,
           ),
-          contentTextStyle: Globals.kBodyText1Style,
-          backgroundColor: ColorsUtils.kSecondaryColor,
-        ),
-        elevatedButtonTheme: ElevatedButtonThemeData(
-          style: Globals.kElevatedButtonStyle,
-        ),
-        textTheme: ThemeData.dark().textTheme.copyWith(
-              bodyText1: Globals.kBodyText1Style,
-              bodyText2: Globals.kBodyText2Style,
-              subtitle1: Globals.kBodyText1Style, //For TextField default style
+          snackBarTheme: SnackBarThemeData(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(10.w)),
             ),
-        cardTheme: CardTheme(
-          color: ColorsUtils.kElevationColor,
-          shape: RoundedRectangleBorder(
-            borderRadius: Globals.kBorderRadius,
+            contentTextStyle: Globals.kBodyText1Style,
+            backgroundColor: ColorsUtils.kSecondaryColor,
           ),
-        ),
-        inputDecorationTheme: Globals.kInputDecorationTheme,
-        scaffoldBackgroundColor: ColorsUtils.kBackgroundColor,
-        brightness: Brightness.dark,
-        primarySwatch: ColorsUtils.kSecondaryColor,
-        primaryColor: ColorsUtils.kPrimaryColor,
-        colorScheme: ColorScheme.dark(
-          secondary: ColorsUtils.kSecondaryColor,
-        ),
-        primaryColorLight: ColorsUtils.kTextColor,
-        backgroundColor: ColorsUtils.kBackgroundColor,
-        floatingActionButtonTheme: FloatingActionButtonThemeData(
-          extendedTextStyle: Globals.kBodyText3Style,
-        )
-      ),
-      initialRoute: '/',
+          elevatedButtonTheme: ElevatedButtonThemeData(
+            style: Globals.kElevatedButtonStyle,
+          ),
+          textTheme: ThemeData.dark().textTheme.copyWith(
+                bodyText1: Globals.kBodyText1Style,
+                bodyText2: Globals.kBodyText2Style,
+                subtitle1:
+                    Globals.kBodyText1Style, //For TextField default style
+              ),
+          cardTheme: CardTheme(
+            color: ColorsUtils.kElevationColor,
+            shape: RoundedRectangleBorder(
+              borderRadius: Globals.kBorderRadius,
+            ),
+          ),
+          inputDecorationTheme: Globals.kInputDecorationTheme,
+          scaffoldBackgroundColor: ColorsUtils.kBackgroundColor,
+          brightness: Brightness.dark,
+          primarySwatch: ColorsUtils.kSecondaryColor,
+          primaryColor: ColorsUtils.kPrimaryColor,
+          colorScheme: ColorScheme.dark(
+            secondary: ColorsUtils.kSecondaryColor,
+          ),
+          primaryColorLight: ColorsUtils.kTextColor,
+          backgroundColor: ColorsUtils.kBackgroundColor,
+          floatingActionButtonTheme: FloatingActionButtonThemeData(
+            extendedTextStyle: Globals.kBodyText3Style,
+          )),
+      initialRoute: AuthState.route,
     ).modular();
   }
 }

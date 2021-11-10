@@ -5,23 +5,25 @@ import 'package:cryptography/cryptography.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:passman/extensions/hex.dart';
 
-class Storage {
+abstract class AuthStorage {
   //Hive Globals
   static const auth = 'authStateBox';
-  static const passwordsBox = 'passwordsBox';
   static const _lastLoginKey = 'lastLogin';
   static const _mPassKey = 'mPass';
   static const _mPassSaltKey = 'mPassSalt';
   static const _mPassMacKey = 'mPassMac';
+  static SecretKey? mPassKey;
   static const _loginExpiryDuration = Duration(minutes: 30);
 
   static DateTime get _expiredDate =>
       DateTime.now().subtract(Duration(days: 1));
 
-  static bool isTokenValid() =>
-      DateTime.now().difference((Hive.box(auth)
-          .get(_lastLoginKey, defaultValue: _expiredDate) as DateTime)) <
-      _loginExpiryDuration;
+  static bool isTokenValid() {
+    final _tokenDuration = DateTime.now().difference((Hive.box(auth)
+        .get(_lastLoginKey, defaultValue: _expiredDate) as DateTime));
+    print('Token Duration: $_tokenDuration');
+    return _tokenDuration < _loginExpiryDuration;
+  }
 
   static void reIssueToken() {
     Hive.box(auth).put(_lastLoginKey, DateTime.now());
@@ -46,6 +48,7 @@ class Storage {
         _secretBox,
         secretKey: _key,
       ));
+      if (_mPin == mPass) mPassKey = _key;
       return _mPin == mPass;
     } catch (err) {
       return false;
