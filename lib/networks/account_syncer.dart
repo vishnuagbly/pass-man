@@ -10,33 +10,38 @@ import 'package:passman/objects/encrypted_object.dart';
 import 'package:passman/utils/storage/deleted.dart';
 import 'package:passman/utils/utils.dart';
 
-class Syncer {
+class AccountSyncer {
   static final collection = FirebaseFirestore.instance.collection('data');
   static const utilsSubCol = 'utils';
   static const _delayDuration = Duration(milliseconds: 500);
   static const _maxDelayTimeoutCount = 5;
 
-  AutoDisposeProviderRef _ref;
+  final AutoDisposeProviderRef _ref;
   bool syncRunning = false;
 
-  static Syncer? _instance;
+  static AccountSyncer? _instance;
+  static AutoDisposeProvider<AccountSyncer>? _provider;
 
-  Syncer._(this._ref) {
+  AccountSyncer._(this._ref) {
     sync();
   }
 
-  static Future<AutoDisposeProvider<Syncer>> get instance async {
-    if (_instance == null) {
-      await Future.wait([
-        Changes.initialize(),
-        Format.initialize(),
-        DeletedNetworks.initialize(),
-      ]);
+  static Future<AutoDisposeProvider<AccountSyncer>> get instance async {
+    if (_provider == null) {
+      if (_instance == null) {
+        await Future.wait([
+          Changes.initialize(),
+          Format.initialize(),
+          DeletedNetworks.initialize(),
+        ]);
+      }
+      _provider = Provider.autoDispose((ref) {
+        if (_instance == null) _instance = AccountSyncer._(ref);
+        return _instance!;
+      });
     }
-    return Provider.autoDispose((ref) {
-      if (_instance == null) _instance = Syncer._(ref);
-      return _instance!;
-    });
+
+    return _provider!;
   }
 
   void sync() {
@@ -45,7 +50,7 @@ class Syncer {
       print("New Online Changes Available");
       final deletedOnline = DeletedNetworks.data;
       _ref.listen(await AccountsList.provider,
-          (AccountsList accountsList) async {
+          (_, AccountsList accountsList) async {
         print("Accounts List Updated");
         _performSync(changes, accountsList, deletedOnline);
       }, fireImmediately: true);

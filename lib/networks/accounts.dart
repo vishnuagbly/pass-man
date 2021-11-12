@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 import 'package:passman/extensions/encryption.dart';
-import 'package:passman/networks/syncer.dart';
+import 'package:passman/networks/account_syncer.dart';
 import 'package:passman/objects/account.dart';
 import 'package:passman/objects/encrypted_object.dart';
 import 'package:passman/utils/storage/secrets.dart';
@@ -17,7 +17,7 @@ class AccountsNetwork {
     final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid == null) throw _loggedOutException;
 
-    return Syncer.collection.doc(uid).collection('accounts');
+    return AccountSyncer.collection.doc(uid).collection('accounts');
   }
 
   static Future<Account?> account(String docId, String accountId) async =>

@@ -1,19 +1,14 @@
-import 'dart:convert';
-
-import 'package:hive/hive.dart';
+import 'package:cryptography/cryptography.dart';
 
 void main() async {
-  Hive.init('testData/');
-  final box = await Hive.openBox('box');
-  box.clear();
-  box.put(
-    '1',
-    jsonEncode({
-      'value': 'uselessString',
-      'values': [1, 24, 5],
-      'dateTime': DateTime.now().toIso8601String(),
-    }),
+  final algo = Ecdh.p521(length: 100);
+  final firstKeyPair = await algo.newKeyPair();
+  final secondKeyPair = await algo.newKeyPair();
+
+  final sharedKey = await algo.sharedSecretKey(
+    keyPair: firstKeyPair,
+    remotePublicKey: await secondKeyPair.extractPublicKey(),
   );
-  Map<String, dynamic> value = jsonDecode(box.get('1'));
-  print(value);
+
+  print('key: ${(await sharedKey.extractBytes()).length}');
 }

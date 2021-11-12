@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
-import 'package:passman/networks/syncer.dart';
+import 'package:passman/networks/account_syncer.dart';
 import 'package:uuid/uuid.dart';
 
 ///These functions are only to be used before checking that you are logged in
@@ -16,7 +16,7 @@ abstract class Format {
     final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid == null) throw _loggedOutException;
 
-    return Syncer.collection.doc('$uid/${Syncer.utilsSubCol}/format');
+    return AccountSyncer.collection.doc('$uid/${AccountSyncer.utilsSubCol}/format');
   }
 
   ///Check if the format doc exists and if not creates one.

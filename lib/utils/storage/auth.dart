@@ -4,16 +4,31 @@ import 'package:crypto/crypto.dart';
 import 'package:cryptography/cryptography.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:passman/extensions/hex.dart';
+import 'package:uuid/uuid.dart';
 
 abstract class AuthStorage {
   //Hive Globals
   static const auth = 'authStateBox';
+  static const _deviceIdKey = 'deviceIdKey';
   static const _lastLoginKey = 'lastLogin';
   static const _mPassKey = 'mPass';
   static const _mPassSaltKey = 'mPassSalt';
   static const _mPassMacKey = 'mPassMac';
   static SecretKey? mPassKey;
+  static String? _deviceId;
   static const _loginExpiryDuration = Duration(minutes: 30);
+
+  static String get deviceId {
+    if (_deviceId == null) {
+      var deviceId = Hive.box(auth).get(_deviceIdKey);
+      if (deviceId == null) {
+        deviceId = Uuid().v1();
+        Hive.box(auth).put(_deviceIdKey, deviceId);
+      }
+      _deviceId = deviceId;
+    }
+    return _deviceId!;
+  }
 
   static DateTime get _expiredDate =>
       DateTime.now().subtract(Duration(days: 1));

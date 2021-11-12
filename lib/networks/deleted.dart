@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
-import 'package:passman/networks/syncer.dart';
+import 'package:passman/networks/account_syncer.dart';
 
 class DeletedNetworks {
   static final _loggedOutException =
@@ -11,7 +11,7 @@ class DeletedNetworks {
     final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid == null) throw _loggedOutException;
 
-    return Syncer.collection.doc('$uid/${Syncer.utilsSubCol}/deleted');
+    return AccountSyncer.collection.doc('$uid/${AccountSyncer.utilsSubCol}/deleted');
   }
 
   ///Check if the Changes Deleted Doc exists and if not creates one.
