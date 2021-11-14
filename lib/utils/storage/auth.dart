@@ -1,6 +1,5 @@
 import 'dart:math';
 
-import 'package:crypto/crypto.dart';
 import 'package:cryptography/cryptography.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:passman/extensions/hex.dart';
@@ -50,7 +49,7 @@ abstract class AuthStorage {
     final _mac = (_box.get(_mPassMacKey) as String).hexUnits;
     final String salt = _box.get(_mPassSaltKey);
 
-    final _rawKey = sha256.convert((mPass.hexString + salt).hexUnits);
+    final _rawKey = await Sha256().hash((mPass.hexString + salt).hexUnits);
     final _algorithm = AesGcm.with256bits();
     final _key = await _algorithm.newSecretKeyFromBytes(_rawKey.bytes);
     final _secretBox = SecretBox(
@@ -80,7 +79,7 @@ abstract class AuthStorage {
   static Future<void> setMPass(String mPass) async {
     //to generate a salt of 96 bits so that it can also be used as IV/nonce.
     final String salt = _randomHexString(12);
-    final _rawKey = sha256.convert((mPass.hexString + salt).hexUnits);
+    final _rawKey = await Sha256().hash((mPass.hexString + salt).hexUnits);
     final _algorithm = AesGcm.with256bits();
     final _key = await _algorithm.newSecretKeyFromBytes(_rawKey.bytes);
     final _mPin = await _algorithm.encrypt(
