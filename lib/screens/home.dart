@@ -7,6 +7,7 @@ import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:helpful_components/common_snapshot_responses.dart';
 import 'package:helpful_components/helpful_components.dart';
 import 'package:passman/networks/account_syncer.dart';
+import 'package:passman/networks/secret_syncer.dart';
 import 'package:passman/objects/accounts_list.dart';
 import 'package:passman/screens/mpass.dart';
 import 'package:passman/utils/globals.dart';
@@ -71,6 +72,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   final _accountsList = ref.watch(_provider);
                   AccountSyncer.instance
                       .then((provider) => ref.watch(provider));
+                  SecretSyncer.instance.then((provider) => ref.watch(provider));
 
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
