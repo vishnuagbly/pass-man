@@ -72,8 +72,7 @@ class AccountsNetwork {
   }
 
   static Future<Account?> _convert(Map<String, dynamic> _encryptedMap) async {
-    final encObj =
-        EncryptedObject.fromMap(Map<String, dynamic>.from(_encryptedMap));
+    final encObj = EncryptedObject.fromMap(_encryptedMap);
     final secret = await Secrets.instance.getSecret(encObj.secretId);
     if (secret == null) return null;
     final _map = await encObj.decryptToMap(secret);

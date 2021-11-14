@@ -64,8 +64,13 @@ class Secrets {
     }
     print("default secret id is null");
 
-    _defaultSecretId = await _addAndGenerateSecret();
-    _box.put(__defaultSecretIdKey, _defaultSecretId);
+    _defaultSecretId = _getDefaultSecretIdIfExists();
+
+    if (_defaultSecretId == null) {
+      _defaultSecretId = await _addAndGenerateSecret();
+      _box.put(__defaultSecretIdKey, _defaultSecretId);
+    }
+
     return (await getSecret(_defaultSecretId!))!;
   }
 
@@ -74,13 +79,7 @@ class Secrets {
       final encodedValueMap = _box.get(id);
       if (encodedValueMap == null) return null;
 
-      final encData =
-          EncryptedObject.fromMap(Map<String, dynamic>.from(encodedValueMap));
-
-      return Secret.fromMap(await encData.decryptToMap(
-        Secret(bytes: await superSecret),
-        force: true,
-      ));
+      return _convert(encodedValueMap);
     } catch (err) {
       print(
           "Looks like the secret is corrupted, will be automatically deleting it.");
@@ -88,6 +87,26 @@ class Secrets {
       _box.delete(id);
       return null;
     }
+  }
+
+  Future<Map<String, Secret>> all() async {
+    Map<String, Secret> res = {};
+    List<Future> futures = [];
+    _box.toMap().forEach((key, value) async {
+      futures.add((() async => res[key] = await _convert(value))());
+    });
+    await Future.wait(futures);
+    return res;
+  }
+
+  Future<Secret> _convert(Map<String, dynamic> encodedValueMap) async {
+    final encData =
+        EncryptedObject.fromMap(Map<String, dynamic>.from(encodedValueMap));
+
+    return Secret.fromMap(await encData.decryptToMap(
+      Secret(bytes: await superSecret),
+      force: true,
+    ));
   }
 
   static String? _getDefaultSecretIdIfExists() {
@@ -126,6 +145,10 @@ class Secrets {
     final algorithm = AesGcm.with256bits();
     final _secret = await (await algorithm.newSecretKey()).extractBytes();
     final secret = Secret(bytes: _secret);
+    return add(secret);
+  }
+
+  Future<String> add(Secret secret) async {
     final encSecretObj = await EncryptedObject.create(
         secret.toString().codeUnits, Secret(bytes: await superSecret));
 
@@ -133,6 +156,7 @@ class Secrets {
       secret.id,
       encSecretObj.map,
     );
+
     return secret.id;
   }
 

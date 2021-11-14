@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -18,6 +20,7 @@ class AccountSyncer {
 
   final AutoDisposeProviderRef _ref;
   bool syncRunning = false;
+  StreamSubscription? _subscription;
 
   static AccountSyncer? _instance;
   static AutoDisposeProvider<AccountSyncer>? _provider;
@@ -44,9 +47,15 @@ class AccountSyncer {
     return _provider!;
   }
 
+  ///Should be called on logout only
+  Future<void> dispose() async {
+    await _subscription?.cancel();
+    _instance = null;
+  }
+
   void sync() {
     print("initialized sync");
-    Changes.stream.listen((changes) async {
+    _subscription = Changes.stream.listen((changes) async {
       print("New Online Changes Available");
       final deletedOnline = DeletedNetworks.data;
       _ref.listen(await AccountsList.provider,

@@ -91,6 +91,8 @@ abstract class AuthStorage {
 
     final _box = Hive.box(auth);
 
+    mPassKey = _key;
+
     _box.put(_mPassKey, _mPin.cipherText.hexString);
     _box.put(_mPassSaltKey, salt);
     _box.put(_mPassMacKey, _mPin.mac.bytes.hexString);
