@@ -76,13 +76,13 @@ class SSNetwork extends ChangeNotifier {
   static void _update(List<int> publicKey, Transaction transaction) =>
       transaction.update(_doc, {AuthStorage.deviceId: publicKey});
 
-  static Future<Map<String, List<int>>> get doc => _doc
-      .get()
-      .then((snapshot) => Map<String, List<int>>.from(snapshot.data() ?? {}));
+  static Future<Map<String, List<int>>> get doc =>
+      _doc.get().then((snapshot) => (snapshot.data() ?? {})
+          .map((key, value) => MapEntry(key, List<int>.from(value))));
 
-  static Stream<Map<String, List<int>>> get _stream => _doc
-      .snapshots()
-      .map((snapshot) => Map<String, List<int>>.from(snapshot.data() ?? {}));
+  static Stream<Map<String, List<int>>> get _stream =>
+      _doc.snapshots().map((snapshot) => (snapshot.data() ?? {})
+          .map((key, value) => MapEntry(key, List<int>.from(value))));
 
   void _sync() async {
     await _initialize();

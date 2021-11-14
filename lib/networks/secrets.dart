@@ -22,7 +22,8 @@ abstract class SecretsNetwork {
     return AccountSyncer.collection.doc('$uid/secrets/$deviceId}');
   }
 
-  static void clear(Transaction transaction) => transaction.set(_doc, {});
+  static void clear(Transaction transaction) =>
+      transaction.set(_doc, <String, dynamic>{});
 
   static Stream<Map<String, Map<String, dynamic>>> get stream =>
       _doc.snapshots().map((snapshot) => (snapshot.data() ?? {}).map(
