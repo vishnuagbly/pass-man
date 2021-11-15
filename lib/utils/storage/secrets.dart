@@ -100,7 +100,7 @@ class Secrets {
     return res;
   }
 
-  Future<Secret> _convert(Map<String, dynamic> encodedValueMap) async {
+  Future<Secret> _convert(encodedValueMap) async {
     final encData =
         EncryptedObject.fromMap(Map<String, dynamic>.from(encodedValueMap));
 

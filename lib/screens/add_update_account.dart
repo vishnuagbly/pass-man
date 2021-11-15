@@ -157,7 +157,6 @@ class _AddUpdateAccountState extends ConsumerState<AddUpdateAccount> {
                   textInputAction: TextInputAction.newline,
                   minLines: 5,
                   maxLines: 5,
-                  validator: Globals.kFieldRequiredValidator,
                 ),
                 Globals.kSizedBox,
               ],

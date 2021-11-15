@@ -34,7 +34,7 @@ class AccountsList extends ChangeNotifier {
       final _data = Database.instance.data;
       _data.removeWhere((key, elem) => elem.type != Account.typeName);
 
-      // print('total secrets: ${Secrets.instance.allSecretsIds()}');
+      // print('total secrets: ${Secrets.instance.allSecretsIds(debug: true)}');
       _data.forEach((key, elem) async {
         // print('secret id: ${elem.secretId}');
         final secret = await Secrets.instance.getSecret(elem.secretId);
