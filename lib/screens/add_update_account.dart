@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:flutter_password_strength/flutter_password_strength.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:helpful_components/helpful_components.dart';
+import 'package:passman/networks/networks.dart';
 import 'package:passman/objects/account.dart';
 import 'package:passman/objects/accounts_list.dart';
 import 'package:passman/utils/globals.dart';
@@ -30,8 +32,29 @@ class _AddUpdateAccountState extends ConsumerState<AddUpdateAccount> {
       _description = TextEditingController();
   bool hidePassword = true;
 
-  void onSubmit() async {
+  Future<void> onSubmit() async {
     if (!(formKey.currentState?.validate() ?? false)) return;
+    final bool? __isStrong = await showDialog<bool>(
+        context: context,
+        builder: (_) => FutureDialog<bool>(
+              future: Api.isStrong(_password.text),
+              hasData: (_isStrong) {
+                final isStrong = _isStrong ?? false;
+                return CommonAlertDialog(
+                  isStrong
+                      ? 'Passed Dictionary Test'
+                      : 'Failed Dictionary Test',
+                  error: !isStrong,
+                  onPressed: () {
+                    if (isStrong)
+                      Navigator.pop(context, true);
+                    else
+                      Navigator.pop(context, false);
+                  },
+                );
+              },
+            ));
+    if (!(__isStrong ?? false)) return;
     final account = Account(
       uuid: _uuid,
       url: _url.text,
@@ -47,6 +70,7 @@ class _AddUpdateAccountState extends ConsumerState<AddUpdateAccount> {
     }
     final accounts = ref.read(await AccountsList.provider);
     accounts.add(account);
+    Modular.to.pop();
   }
 
   @override
@@ -142,10 +166,7 @@ class _AddUpdateAccountState extends ConsumerState<AddUpdateAccount> {
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          onSubmit();
-          Modular.to.pop();
-        },
+        onPressed: onSubmit,
         label: Text("Submit"),
       ),
     );
