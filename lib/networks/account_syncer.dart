@@ -59,7 +59,7 @@ class AccountSyncer {
       print("New Online Changes Available");
       final deletedOnline = DeletedNetworks.data;
       _ref.listen(await AccountsList.provider,
-          (_, AccountsList accountsList) async {
+          (AccountsList accountsList) async {
         print("Accounts List Updated");
         _performSync(changes, accountsList, deletedOnline);
       }, fireImmediately: true);

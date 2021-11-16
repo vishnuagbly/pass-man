@@ -48,7 +48,7 @@ class SecretSyncer {
     _subscription = SecretsNetwork.stream.listen((secretsMap) {
       print('received_secrets updated');
       print('total received_secrets: ${secretsMap.length}');
-      _ref.listen(SSNetwork.instance, (_, SSNetwork ssNetwork) async {
+      _ref.listen(SSNetwork.instance, (SSNetwork ssNetwork) async {
         print('shared keys updated');
         print('total shared keys: ${ssNetwork.sharedKeys.length}');
         await _toLocal(ssNetwork, secretsMap);
