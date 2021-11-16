@@ -75,94 +75,103 @@ class _HomeScreenState extends State<HomeScreen> {
                       .then((provider) => ref.watch(provider));
                   SecretSyncer.instance.then((provider) => ref.watch(provider));
 
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: ListView.builder(
-                      itemCount: _accountsList.accounts.values.length,
-                      itemBuilder: (_, i) =>
-                          Consumer(builder: (context, _ref, _) {
-                        final _accProvider =
-                            _accountsList.accounts.values.toList()[i];
-                        final _url = _ref
-                            .watch(_accProvider.select((value) => value.url));
-                        final logoUrl = Api.logo(_url);
-                        final key = GlobalKey();
-                        return Card(
-                          key: key,
-                          child: InkWell(
-                            onTap: () {
-                              Modular.to.pushNamed(
-                                AddUpdateAccount.route,
-                                arguments: _accProvider,
-                              );
-                            },
-                            onLongPress: () {
-                              showPopup(
-                                showBarrierColor: true,
-                                context: context,
-                                builder: (overlayEntry) => Popup(
-                                  parentKey: key,
-                                  child: Card(
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Column(
-                                        children: [
-                                          TextButton(
-                                            onPressed: () {
-                                              _ref.read(_provider).remove(
-                                                  _ref.read(_accProvider));
-                                              overlayEntry.remove();
-                                            },
-                                            child: Text(
-                                              'Delete',
-                                              style: Globals.kBodyText1Style
-                                                  .copyWith(
-                                                color: Colors.red,
-                                              ),
-                                            ),
+                  return Center(
+                    child: Container(
+                      constraints:
+                          BoxConstraints(maxWidth: Globals.webMaxWidth),
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: ListView.builder(
+                        itemCount: _accountsList.accounts.values.length,
+                        itemBuilder: (_, i) =>
+                            Consumer(builder: (context, _ref, _) {
+                          final _accProvider =
+                              _accountsList.accounts.values.toList()[i];
+                          final _url = _ref
+                              .watch(_accProvider.select((value) => value.url));
+                          final logoUrl = Api.logo(_url);
+                          final key = GlobalKey();
+
+                          final popUp = (OverlayEntry overlayEntry) => Card(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Column(
+                                    children: [
+                                      TextButton(
+                                        onPressed: () {
+                                          _ref
+                                              .read(_provider)
+                                              .remove(_ref.read(_accProvider));
+                                          overlayEntry.remove();
+                                        },
+                                        child: Text(
+                                          'Delete',
+                                          style:
+                                              Globals.kBodyText1Style.copyWith(
+                                            color: Colors.red,
                                           ),
-                                        ],
+                                        ),
                                       ),
-                                    ),
+                                    ],
                                   ),
                                 ),
                               );
-                            },
-                            child: Container(
-                              width: double.infinity,
-                              height: 100,
-                              child: Row(
+
+                          final logo = FutureBuilder<String>(
+                            future: logoUrl,
+                            builder: (_, snapshot) {
+                              if (snapshot.data == null) return Container();
+                              return Row(
                                 mainAxisSize: MainAxisSize.min,
-                                mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  FutureBuilder<String>(
-                                    future: logoUrl,
-                                    builder: (_, snapshot) {
-                                      if (snapshot.data == null)
-                                        return Container();
-                                      return Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Image.network(
-                                            snapshot.data!,
-                                            width: 10.w,
-                                            height: 10.w,
-                                          ),
-                                          SizedBox(width: 5.w),
-                                        ],
-                                      );
-                                    },
+                                  Image.network(
+                                    snapshot.data!,
+                                    width: 10.w,
+                                    height: 10.w,
                                   ),
-                                  Text(
-                                    _url,
-                                    style: TextStyle(fontSize: 4.w),
-                                  ),
+                                  SizedBox(width: 5.w),
                                 ],
+                              );
+                            },
+                          );
+
+                          return Card(
+                            key: key,
+                            child: InkWell(
+                              onTap: () {
+                                Modular.to.pushNamed(
+                                  AddUpdateAccount.route,
+                                  arguments: _accProvider,
+                                );
+                              },
+                              onLongPress: () {
+                                showPopup(
+                                  showBarrierColor: true,
+                                  context: context,
+                                  builder: (overlayEntry) => Popup(
+                                    parentKey: key,
+                                    child: popUp(overlayEntry),
+                                  ),
+                                );
+                              },
+                              child: Container(
+                                width: double.infinity,
+                                height: 100,
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    logo,
+                                    Text(
+                                      _url,
+                                      style: TextStyle(fontSize: 4.w),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
-                          ),
-                        );
-                      }),
+                          );
+                        }),
+                      ),
                     ),
                   );
                 },

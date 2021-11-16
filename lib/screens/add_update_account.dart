@@ -96,70 +96,73 @@ class _AddUpdateAccountState extends ConsumerState<AddUpdateAccount> {
         title: Text('Add/Update Password'),
       ),
       body: SingleChildScrollView(
-        child: Padding(
-          padding: Globals.kScreenPadding,
-          child: Form(
-            key: formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                TextFormField(
-                  controller: _url,
-                  decoration: InputDecoration(
-                    hintText: 'URL',
+        child: Center(
+          child: Container(
+            constraints: BoxConstraints(maxWidth: Globals.webMaxWidth),
+            padding: Globals.kScreenPadding,
+            child: Form(
+              key: formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  TextFormField(
+                    controller: _url,
+                    decoration: InputDecoration(
+                      hintText: 'URL',
+                    ),
+                    validator: Globals.kFieldRequiredValidator,
                   ),
-                  validator: Globals.kFieldRequiredValidator,
-                ),
-                Globals.kSizedBox,
-                TextFormField(
-                  controller: _username,
-                  decoration: InputDecoration(
-                    hintText: 'Username/Email',
+                  Globals.kSizedBox,
+                  TextFormField(
+                    controller: _username,
+                    decoration: InputDecoration(
+                      hintText: 'Username/Email',
+                    ),
+                    validator: Globals.kFieldRequiredValidator,
                   ),
-                  validator: Globals.kFieldRequiredValidator,
-                ),
-                Globals.kSizedBox,
-                TextFormField(
-                  controller: _password,
-                  decoration: InputDecoration(
-                    hintText: 'Password',
-                    suffixIcon: IconButton(
-                      onPressed: () {
-                        setState(() {
-                          hidePassword = !hidePassword;
-                        });
-                      },
-                      icon: Icon(hidePassword
-                          ? Icons.visibility
-                          : Icons.visibility_off),
+                  Globals.kSizedBox,
+                  TextFormField(
+                    controller: _password,
+                    decoration: InputDecoration(
+                      hintText: 'Password',
+                      suffixIcon: IconButton(
+                        onPressed: () {
+                          setState(() {
+                            hidePassword = !hidePassword;
+                          });
+                        },
+                        icon: Icon(hidePassword
+                            ? Icons.visibility
+                            : Icons.visibility_off),
+                      ),
+                    ),
+                    onChanged: (_) {
+                      setState(() {});
+                    },
+                    obscureText: hidePassword,
+                    validator: Globals.kFieldRequiredValidator,
+                  ),
+                  Globals.kSizedBox,
+                  AnimatedOpacity(
+                    opacity: _password.text.isEmpty ? 0 : 1,
+                    duration: Duration(milliseconds: 300),
+                    child: FlutterPasswordStrength(
+                      password: _password.text,
                     ),
                   ),
-                  onChanged: (_) {
-                    setState(() {});
-                  },
-                  obscureText: hidePassword,
-                  validator: Globals.kFieldRequiredValidator,
-                ),
-                Globals.kSizedBox,
-                AnimatedOpacity(
-                  opacity: _password.text.isEmpty ? 0 : 1,
-                  duration: Duration(milliseconds: 300),
-                  child: FlutterPasswordStrength(
-                    password: _password.text,
+                  Globals.kSizedBox,
+                  TextFormField(
+                    controller: _description,
+                    decoration: InputDecoration(
+                      hintText: 'Description...',
+                    ),
+                    textInputAction: TextInputAction.newline,
+                    minLines: 5,
+                    maxLines: 5,
                   ),
-                ),
-                Globals.kSizedBox,
-                TextFormField(
-                  controller: _description,
-                  decoration: InputDecoration(
-                    hintText: 'Description...',
-                  ),
-                  textInputAction: TextInputAction.newline,
-                  minLines: 5,
-                  maxLines: 5,
-                ),
-                Globals.kSizedBox,
-              ],
+                  Globals.kSizedBox,
+                ],
+              ),
             ),
           ),
         ),

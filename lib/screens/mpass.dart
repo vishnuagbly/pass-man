@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_modular/flutter_modular.dart';
 import 'package:passman/utils/utils.dart';
 
 class MPassword extends StatefulWidget {
@@ -17,7 +18,7 @@ class _MPasswordState extends State<MPassword> {
       body: Center(
         child: Container(
           constraints: BoxConstraints(
-            maxWidth: 500,
+            maxWidth: Globals.webMaxWidth,
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -38,6 +39,7 @@ class _MPasswordState extends State<MPassword> {
                         ),
                       ),
                     );
+                    Modular.to.pop();
                   } catch (err) {
                     print(err);
                   }
