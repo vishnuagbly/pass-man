@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
-import 'package:passman/networks/syncer.dart';
+import 'package:passman/networks/account_syncer.dart';
 
 class Changes {
   static final _loggedOutException =
@@ -11,7 +11,7 @@ class Changes {
     final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid == null) throw _loggedOutException;
 
-    return Syncer.collection.doc('$uid/${Syncer.utilsSubCol}/changes');
+    return AccountSyncer.collection.doc('$uid/${AccountSyncer.utilsSubCol}/changes');
   }
 
   ///Check if the Changes doc exists and if not creates one.

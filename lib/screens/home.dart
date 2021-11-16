@@ -1,17 +1,21 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:helpful_components/common_snapshot_responses.dart';
 import 'package:helpful_components/helpful_components.dart';
-import 'package:passman/networks/syncer.dart';
+import 'package:passman/networks/account_syncer.dart';
+import 'package:passman/networks/api_calls.dart';
+import 'package:passman/networks/secret_syncer.dart';
 import 'package:passman/objects/accounts_list.dart';
 import 'package:passman/screens/mpass.dart';
 import 'package:passman/utils/globals.dart';
+import 'package:passman/utils/storage/auth.dart';
 
-import 'add_update_note.dart';
 import 'add_update_account.dart';
+import 'add_update_note.dart';
 
 class HomeScreen extends StatefulWidget {
   static const route = "/home";
@@ -26,6 +30,16 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final _provider = AccountsList.provider;
+
+  @override
+  void initState() {
+    if (kIsWeb && AuthStorage.mPassKey == null)
+      WidgetsBinding.instance!.addPostFrameCallback((_) {
+        Modular.to.pushNamed(MPassword.route);
+      });
+
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +71,9 @@ class _HomeScreenState extends State<HomeScreen> {
               builder: (AccountsListProvider _provider) => Consumer(
                 builder: (_, ref, __) {
                   final _accountsList = ref.watch(_provider);
-                  Syncer.instance.then((provider) => ref.watch(provider));
+                  AccountSyncer.instance
+                      .then((provider) => ref.watch(provider));
+                  SecretSyncer.instance.then((provider) => ref.watch(provider));
 
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -69,6 +85,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             _accountsList.accounts.values.toList()[i];
                         final _url = _ref
                             .watch(_accProvider.select((value) => value.url));
+                        final logoUrl = Api.logo(_url);
                         final key = GlobalKey();
                         return Card(
                           key: key,
@@ -114,11 +131,33 @@ class _HomeScreenState extends State<HomeScreen> {
                             child: Container(
                               width: double.infinity,
                               height: 100,
-                              child: Center(
-                                child: Text(
-                                  _url,
-                                  style: TextStyle(fontSize: 4.w),
-                                ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  FutureBuilder<String>(
+                                    future: logoUrl,
+                                    builder: (_, snapshot) {
+                                      if (snapshot.data == null)
+                                        return Container();
+                                      return Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Image.network(
+                                            snapshot.data!,
+                                            width: 10.w,
+                                            height: 10.w,
+                                          ),
+                                          SizedBox(width: 5.w),
+                                        ],
+                                      );
+                                    },
+                                  ),
+                                  Text(
+                                    _url,
+                                    style: TextStyle(fontSize: 4.w),
+                                  ),
+                                ],
                               ),
                             ),
                           ),

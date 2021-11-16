@@ -1,19 +1,33 @@
 import 'dart:math';
 
-import 'package:crypto/crypto.dart';
 import 'package:cryptography/cryptography.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:passman/extensions/hex.dart';
+import 'package:uuid/uuid.dart';
 
 abstract class AuthStorage {
   //Hive Globals
   static const auth = 'authStateBox';
+  static const _deviceIdKey = 'deviceIdKey';
   static const _lastLoginKey = 'lastLogin';
   static const _mPassKey = 'mPass';
   static const _mPassSaltKey = 'mPassSalt';
   static const _mPassMacKey = 'mPassMac';
   static SecretKey? mPassKey;
+  static String? _deviceId;
   static const _loginExpiryDuration = Duration(minutes: 30);
+
+  static String get deviceId {
+    if (_deviceId == null) {
+      var deviceId = Hive.box(auth).get(_deviceIdKey);
+      if (deviceId == null) {
+        deviceId = Uuid().v1();
+        Hive.box(auth).put(_deviceIdKey, deviceId);
+      }
+      _deviceId = deviceId;
+    }
+    return _deviceId!;
+  }
 
   static DateTime get _expiredDate =>
       DateTime.now().subtract(Duration(days: 1));
@@ -35,7 +49,7 @@ abstract class AuthStorage {
     final _mac = (_box.get(_mPassMacKey) as String).hexUnits;
     final String salt = _box.get(_mPassSaltKey);
 
-    final _rawKey = sha256.convert((mPass.hexString + salt).hexUnits);
+    final _rawKey = await Sha256().hash((mPass.hexString + salt).hexUnits);
     final _algorithm = AesGcm.with256bits();
     final _key = await _algorithm.newSecretKeyFromBytes(_rawKey.bytes);
     final _secretBox = SecretBox(
@@ -65,7 +79,7 @@ abstract class AuthStorage {
   static Future<void> setMPass(String mPass) async {
     //to generate a salt of 96 bits so that it can also be used as IV/nonce.
     final String salt = _randomHexString(12);
-    final _rawKey = sha256.convert((mPass.hexString + salt).hexUnits);
+    final _rawKey = await Sha256().hash((mPass.hexString + salt).hexUnits);
     final _algorithm = AesGcm.with256bits();
     final _key = await _algorithm.newSecretKeyFromBytes(_rawKey.bytes);
     final _mPin = await _algorithm.encrypt(
@@ -75,6 +89,8 @@ abstract class AuthStorage {
     );
 
     final _box = Hive.box(auth);
+
+    mPassKey = _key;
 
     _box.put(_mPassKey, _mPin.cipherText.hexString);
     _box.put(_mPassSaltKey, salt);
