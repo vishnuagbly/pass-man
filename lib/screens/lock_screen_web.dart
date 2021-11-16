@@ -21,7 +21,8 @@ class _LockScreenWebState extends State<LockScreenWeb> {
 
   @override
   void initState() {
-    if (AuthStorage.isTokenValid()) _authorized = true;
+    if (AuthStorage.isTokenValid() && AuthStorage.mPassKey != null)
+      _authorized = true;
     if (!AuthStorage.mPassExists()) _authorized = true;
     if (_authorized) AuthStorage.reIssueToken();
     super.initState();
@@ -31,7 +32,7 @@ class _LockScreenWebState extends State<LockScreenWeb> {
   Widget build(BuildContext context) {
     if (_authorized)
       WidgetsBinding.instance!.addPostFrameCallback((_) {
-        Modular.to.pushReplacementNamed(HomeScreen.route);
+        Modular.to.popAndPushNamed(HomeScreen.route);
       });
     return _authorized
         ? Container()

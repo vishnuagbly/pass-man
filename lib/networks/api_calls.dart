@@ -21,7 +21,7 @@ abstract class Api {
     throw PlatformException(code: 'ERROR');
   }
 
-  static Future<String> logo(String url) async {
+  static Future<List<String>> logo(String url) async {
     final httpCallUrl =
         'https://mycorsproxy-iss.herokuapp.com/https://logo-extractor-232.herokuapp.com/allicons.json?url=$url';
 
@@ -30,7 +30,11 @@ abstract class Api {
 
     final body = jsonDecode(res.body);
 
-    if (res.statusCode == 200) return body['icons'][0]['url'];
+    if (res.statusCode == 200) {
+      List<String> res = [];
+      for (final elem in body['icons']) res.add(elem['url']);
+      return res;
+    }
 
     throw PlatformException(code: 'ERROR');
   }

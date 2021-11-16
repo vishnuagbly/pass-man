@@ -12,13 +12,18 @@ class EncryptedObject {
   final String secretId;
   final String? type;
   final Cipher cipher;
+  final DateTime created, updated;
 
   EncryptedObject({
     required this.secretBox,
     required this.secretId,
     this.type,
     Cipher? cipher,
-  }) : this.cipher = defaultCipher;
+    DateTime? created,
+    DateTime? updated,
+  })  : this.cipher = defaultCipher,
+        this.created = created ?? updated ?? DateTime.now(),
+        this.updated = updated ?? created ?? DateTime.now();
 
   factory EncryptedObject.fromMap(Map<String, dynamic> map) => EncryptedObject(
         secretBox: SecretBox(
@@ -29,6 +34,8 @@ class EncryptedObject {
         secretId: map['secretId'],
         cipher: getCipherFromString(map['cipher']),
         type: map['type'],
+        created: DateTime.tryParse(map['created'] ?? ''),
+        updated: DateTime.tryParse(map['updated'] ?? ''),
       );
 
   factory EncryptedObject.dummy() => EncryptedObject(
@@ -39,7 +46,10 @@ class EncryptedObject {
   }
 
   static Future<EncryptedObject> create(List<int> value, Secret secret,
-      {Cipher? cipher, String? type}) async {
+      {Cipher? cipher,
+      String? type,
+      DateTime? created,
+      DateTime? updated}) async {
     Cipher _cipher = cipher ?? defaultCipher;
     final secretBox = await _cipher.encrypt(
       value,
@@ -52,6 +62,8 @@ class EncryptedObject {
       cipher: _cipher,
       secretId: secret.id,
       type: type,
+      created: created,
+      updated: updated,
     );
   }
 
@@ -72,5 +84,7 @@ class EncryptedObject {
         'secretId': secretId,
         'cipher': cipher.toString(),
         'type': type,
+        'updated': updated.toIso8601String(),
+        'created': created.toIso8601String(),
       };
 }

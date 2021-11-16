@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:cryptography/cryptography.dart';
+import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:passman/extensions/hex.dart';
 import 'package:uuid/uuid.dart';
@@ -21,7 +22,7 @@ abstract class AuthStorage {
     if (_deviceId == null) {
       var deviceId = Hive.box(auth).get(_deviceIdKey);
       if (deviceId == null) {
-        deviceId = Uuid().v1();
+        deviceId = kIsWeb ? 'web' : Uuid().v1();
         Hive.box(auth).put(_deviceIdKey, deviceId);
       }
       _deviceId = deviceId;
@@ -39,9 +40,8 @@ abstract class AuthStorage {
     return _tokenDuration < _loginExpiryDuration;
   }
 
-  static void reIssueToken() {
-    Hive.box(auth).put(_lastLoginKey, DateTime.now());
-  }
+  static Future<void> reIssueToken() =>
+      Hive.box(auth).put(_lastLoginKey, DateTime.now());
 
   static Future<bool> verifyMPass(String mPass) async {
     final _box = Hive.box(auth);
@@ -96,8 +96,8 @@ abstract class AuthStorage {
       _box.put(_mPassKey, _mPin.cipherText.hexString),
       _box.put(_mPassSaltKey, salt),
       _box.put(_mPassMacKey, _mPin.mac.bytes.hexString),
+      reIssueToken(),
     ]);
-
   }
 
   static void clearMPass() {

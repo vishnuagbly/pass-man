@@ -1,4 +1,5 @@
 //export all custom extensions
-export 'hex.dart';
-export 'widget.dart';
 export 'encryption.dart';
+export 'hex.dart';
+export 'shared_key.dart';
+export 'widget.dart';

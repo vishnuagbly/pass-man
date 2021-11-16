@@ -35,16 +35,18 @@ class AccountsList extends ChangeNotifier {
       _data.removeWhere((key, elem) => elem.type != Account.typeName);
 
       // print('total secrets: ${Secrets.instance.allSecretsIds(debug: true)}');
-      _data.forEach((key, elem) async {
+      for (final key in _data.keys) {
+        final elem = _data[key]!;
         // print('secret id: ${elem.secretId}');
+
         final secret = await Secrets.instance.getSecret(elem.secretId);
         if (secret == null) {
           encObjs[key] = elem;
-          return;
+          continue;
         }
 
         accounts.add(Account.fromMap(await elem.decryptToMap(secret)));
-      });
+      }
 
       _provider = ChangeNotifierProvider.autoDispose(
           (ref) => AccountsList._(accounts, encObjs: encObjs));

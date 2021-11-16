@@ -8,8 +8,9 @@ import 'package:flutter_modular/flutter_modular.dart';
 import 'package:helpful_components/helpful_components.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:passman/screens/home.dart';
-import '../utils/utils.dart';
+
 import '../utils/globals.dart';
+import '../utils/utils.dart';
 
 Widget lockScreen() => LockScreen();
 
@@ -78,9 +79,7 @@ class _LockScreenState extends State<LockScreen> {
           onPressed: () {
             WidgetsBinding.instance!.addPostFrameCallback((_) {
               if (AuthStorage.mPassExists()) {
-                setState(() {
-                  _body = _mPass;
-                });
+                setState(() => _body = _mPass);
                 return;
               }
               print("M-Pass Does not exist");

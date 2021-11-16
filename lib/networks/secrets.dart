@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 import 'package:passman/extensions/encryption.dart';
 import 'package:passman/networks/account_syncer.dart';
+import 'package:passman/networks/networks.dart';
 import 'package:passman/objects/encrypted_object.dart';
 import 'package:passman/objects/secret.dart';
 import 'package:passman/utils/storage/auth.dart';
@@ -25,28 +26,34 @@ abstract class SecretsNetwork {
   static void clear(Transaction transaction) =>
       transaction.set(_doc, <String, dynamic>{});
 
-  static Stream<Map<String, Map<String, dynamic>>> get stream =>
-      _doc.snapshots().map((snapshot) => (snapshot.data() ?? {}).map(
-          (key, value) => MapEntry(key, Map<String, dynamic>.from(value))));
+  static Stream<Map<String, EncryptedObject>> get stream => _doc
+      .snapshots()
+      .map((snapshot) => (snapshot.data() ?? {}).map((key, value) => MapEntry(
+          key, EncryptedObject.fromMap(Map<String, dynamic>.from(value)))));
 
-  static Future<Map<String, Secret>> convert(
-      Map<String, Map<String, dynamic>> data,
-      Map<String, List<int>> sharedSecrets) async {
+  static Future<Map<String, Secret>> convert(Map<String, EncryptedObject> data,
+      Map<String, SharedKey> sharedSecrets) async {
     Map<String, Secret> res = {};
     for (final key in data.keys) {
       final secret = sharedSecrets[key];
       if (secret == null) continue;
-      res[key] = await _convert(data[key]!, secret);
+      final decryptedSecret = await _convert(data[key]!, await secret.bytes);
+      if (decryptedSecret == null) continue;
+      res[key] = decryptedSecret;
     }
     return res;
   }
 
-  static Future<Secret> _convert(
-      Map<String, dynamic> _encryptedMap, List<int> sharedSecret) async {
-    final encObj = EncryptedObject.fromMap(_encryptedMap);
-    final secret = await Sha256().hash(sharedSecret);
-    final _map =
-        await encObj.decryptToMap(Secret(bytes: secret.bytes), force: true);
-    return Secret.fromMap(_map);
+  static Future<Secret?> _convert(
+      EncryptedObject encObj, List<int> sharedSecret) async {
+    try {
+      final secret = await Sha256().hash(sharedSecret);
+      final _map =
+          await encObj.decryptToMap(Secret(bytes: secret.bytes), force: true);
+      return Secret.fromMap(_map);
+    } catch (err) {
+      print(err);
+      return null;
+    }
   }
 }

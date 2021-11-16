@@ -12,7 +12,6 @@ import 'package:passman/networks/secret_syncer.dart';
 import 'package:passman/objects/accounts_list.dart';
 import 'package:passman/screens/mpass.dart';
 import 'package:passman/utils/globals.dart';
-import 'package:passman/utils/storage/auth.dart';
 
 import 'add_update_account.dart';
 import 'add_update_note.dart';
@@ -30,16 +29,6 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final _provider = AccountsList.provider;
-
-  @override
-  void initState() {
-    if (kIsWeb && AuthStorage.mPassKey == null)
-      WidgetsBinding.instance!.addPostFrameCallback((_) {
-        Modular.to.pushNamed(MPassword.route);
-      });
-
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -66,6 +55,7 @@ class _HomeScreenState extends State<HomeScreen> {
       body: FutureBuilder<AccountsListProvider>(
           future: _provider,
           builder: (context, snapshot) {
+            if (snapshot.hasError) throw snapshot.error!;
             return CommonAsyncSnapshotResponses(
               snapshot,
               builder: (AccountsListProvider _provider) => Consumer(
@@ -116,21 +106,29 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                               );
 
-                          final logo = FutureBuilder<String>(
+                          final logo = FutureBuilder<List<String>>(
                             future: logoUrl,
                             builder: (_, snapshot) {
+                              late final Function(List<String>, [int index])
+                                  _image;
+                              _image = (List<String> urls, [int index = 0]) {
+                                if (urls.length <= index) return Container();
+                                return Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Image.network(
+                                      urls[index],
+                                      width: 10.w,
+                                      height: 10.w,
+                                      errorBuilder: (context, _, __) =>
+                                          _image(urls, index + 1),
+                                    ),
+                                    SizedBox(width: 5.w),
+                                  ],
+                                );
+                              };
                               if (snapshot.data == null) return Container();
-                              return Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Image.network(
-                                    snapshot.data!,
-                                    width: 10.w,
-                                    height: 10.w,
-                                  ),
-                                  SizedBox(width: 5.w),
-                                ],
-                              );
+                              return _image(snapshot.data!);
                             },
                           );
 

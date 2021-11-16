@@ -28,13 +28,13 @@ class SuperSecretWeb extends SuperSecret {
     final _mPassKey = AuthStorage.mPassKey;
     if (_mPassKey == null) throw PlatformException(code: 'MPASS_NULL');
 
-    final _box = Hive.box<List<int>>(superSecretBoxName);
+    final _box = Hive.box(superSecretBoxName);
     final _algorithm = AesGcm.with256bits();
-    final _encryptedKey = _box.get(_superSecretKey);
-    final _mac = _box.get(_superSecretMac);
-    final _nonce = _box.get(_superSecretNonce);
+    final _encryptedKey = List<int>.from(_box.get(_superSecretKey) ?? []);
+    final _mac = List<int>.from(_box.get(_superSecretMac) ?? []);
+    final _nonce = List<int>.from(_box.get(_superSecretNonce) ?? []);
 
-    if (_encryptedKey == null || _mac == null || _nonce == null) {
+    if (_encryptedKey.isEmpty || _mac.isEmpty || _nonce.isEmpty) {
       print("WARNING: Either no key or corrupted key (WEB)");
       print("Generating New Key (WEB)");
 

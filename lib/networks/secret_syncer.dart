@@ -3,9 +3,11 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cryptography/cryptography.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:passman/extensions/extensions.dart';
 import 'package:passman/networks/secrets.dart';
 import 'package:passman/networks/share_secret.dart';
 import 'package:passman/objects/accounts_list.dart';
+import 'package:passman/objects/encrypted_object.dart';
 import 'package:passman/utils/utils.dart';
 
 class SecretSyncer {
@@ -43,43 +45,71 @@ class SecretSyncer {
     _instance = null;
   }
 
-  void _sync() {
+  void _sync() async {
     print('secret syncer started');
-    _subscription = SecretsNetwork.stream.listen((secretsMap) {
+    Map<String, EncryptedObject> secretsMap = {};
+    SSNetwork ssNetwork = _ref.read(SSNetwork.instance)..initialize();
+
+    _subscription = SecretsNetwork.stream.listen((_secretsMap) {
+      var _update = false;
+      for (final key in _secretsMap.keys) {
+        final value = _secretsMap[key]!;
+
+        if (secretsMap.containsKey(key) &&
+            secretsMap[key]!.updated == value.updated) continue;
+
+        _update = true;
+        break;
+      }
+      secretsMap.removeWhere((key, value) => !_secretsMap.containsKey(key));
+      if (!_update) return;
       print('received_secrets updated');
-      print('total received_secrets: ${secretsMap.length}');
-      _ref.listen(SSNetwork.instance, (SSNetwork ssNetwork) async {
-        print('shared keys updated');
-        print('total shared keys: ${ssNetwork.sharedKeys.length}');
-        await _toLocal(ssNetwork, secretsMap);
-        _toOnline(ssNetwork);
-        _ref.read(await AccountsList.provider).reloadEncObjs();
-      }, fireImmediately: true);
+      print('total received_secrets: ${_secretsMap.length}');
+      secretsMap = _secretsMap;
+      __sync(ssNetwork, secretsMap);
+    });
+
+    _ref.listen(SSNetwork.instance, (SSNetwork _ssNetwork) async {
+      print('shared keys updated');
+      print('total shared keys: ${ssNetwork.updatedSharedKeys.length}');
+      ssNetwork = _ssNetwork; //probably is a useless line
+      __sync(ssNetwork, secretsMap);
     });
   }
 
+  Future<void> __sync(
+      SSNetwork ssNetwork, Map<String, EncryptedObject> secretsMap) async {
+    final sharedKeys = await ssNetwork.updatedSharedKeys.clone;
+    await _toLocal(sharedKeys, secretsMap);
+    // print('performed to local secrets sync');
+    _toOnline(ssNetwork, sharedKeys);
+    // print('performed to online secrets sync');
+    _ref.read(await AccountsList.provider).reloadEncObjs();
+  }
+
   Future<void> _toLocal(
-    SSNetwork ssNetwork,
-    Map<String, Map<String, dynamic>> secretsMap,
+    Map<String, SharedKey> sharedKeys,
+    Map<String, EncryptedObject> secretsMap,
   ) async {
-    final secrets =
-        await SecretsNetwork.convert(secretsMap, ssNetwork.sharedKeys);
+    final secrets = await SecretsNetwork.convert(secretsMap, sharedKeys);
 
     final List<Future> futures = [];
 
-    secrets.forEach((key, value) async {
+    for (final key in secrets.keys) {
+      final value = secrets[key]!;
+
       final secret = await Secrets.instance.getSecret(value.id);
       if (secret != null) return;
       futures.add(Secrets.instance.add(value));
-    });
+    }
 
     await Future.wait(futures);
   }
 
-  Future<void> _toOnline(SSNetwork ssNetwork) async {
+  Future<void> _toOnline(
+      SSNetwork ssNetwork, Map<String, SharedKey> sharedKeys) async {
     final toSetDocs = await ssNetwork.toSetDocs;
     await FirebaseFirestore.instance.runTransaction(
-      (transaction) async => ssNetwork.upload(transaction, toSetDocs),
-    );
+        (transaction) => ssNetwork.upload(transaction, toSetDocs, sharedKeys));
   }
 }

@@ -92,7 +92,7 @@ class Secrets {
   Future<Map<String, Secret>> all() async {
     Map<String, Secret> res = {};
     List<Future> futures = [];
-    _box.toMap().forEach((key, value) async {
+    _box.toMap().forEach((key, value) {
       if (key == __defaultSecretIdKey || value == null) return;
       futures.add((() async => res[key] = await _convert(value))());
     });

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
+import 'package:passman/screens/home.dart';
 import 'package:passman/utils/utils.dart';
 
 class MPassword extends StatefulWidget {
@@ -39,7 +40,7 @@ class _MPasswordState extends State<MPassword> {
                         ),
                       ),
                     );
-                    Modular.to.pop();
+                    Modular.to.popAndPushNamed(HomeScreen.route);
                   } catch (err) {
                     print(err);
                   }

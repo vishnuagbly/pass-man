@@ -31,7 +31,7 @@ class Account {
             _map['updated'] != null,
         'SOME REQUIRED FIELD IS NULL');
 
-    final created = DateTime.tryParse(_map['created'] ?? _map['updated']);
+    final created = DateTime.tryParse(_map['created'] ?? _map['updated'] ?? '');
     final updated = DateTime.tryParse(_map['updated']) ?? created;
 
     assert(updated != null, 'CORRUPTED TIMESTAMP');
