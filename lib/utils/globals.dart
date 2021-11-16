@@ -22,11 +22,13 @@ abstract class Globals {
   static double get rawScreenWidth =>
       window.physicalSize.width / window.devicePixelRatio;
 
-  static double get screenWidth => min(rawScreenWidth, 500);
+  static double get screenWidth => min(rawScreenWidth, webMaxWidth);
 
   static double get platformWidth => kIsWeb ? screenWidth : rawScreenWidth;
 
   //Constants from here
+  static const double webMaxWidth = 500;
+
   static final ButtonStyle kElevatedButtonStyle = ElevatedButton.styleFrom(
     primary: ColorsUtils.kPrimaryColor,
     shape: RoundedRectangleBorder(

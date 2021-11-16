@@ -38,7 +38,7 @@ class _LockScreenWebState extends State<LockScreenWeb> {
         : Scaffold(
             body: Center(
               child: Container(
-                constraints: BoxConstraints(maxWidth: 500),
+                constraints: BoxConstraints(maxWidth: Globals.webMaxWidth),
                 child: GestureDetector(
                   behavior: HitTestBehavior.opaque,
                   child: BackdropFilter(

@@ -96,7 +96,8 @@ class _AddUpdateAccountState extends ConsumerState<AddUpdateAccount> {
         title: Text('Add/Update Password'),
       ),
       body: SingleChildScrollView(
-        child: Padding(
+        child: Container(
+          constraints: BoxConstraints(maxWidth: Globals.webMaxWidth),
           padding: Globals.kScreenPadding,
           child: Form(
             key: formKey,

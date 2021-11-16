@@ -25,7 +25,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
       appBar: AppBar(
         title: Text('Sign Up', style: Globals.kHeading1Style),
       ),
-      body: Padding(
+      body: Container(
+        constraints: BoxConstraints(maxWidth: Globals.webMaxWidth),
         padding: Globals.kScreenPadding,
         child: Form(
           key: _formKey,
