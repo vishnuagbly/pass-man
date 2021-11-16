@@ -25,27 +25,29 @@ class _SignUpScreenState extends State<SignUpScreen> {
       appBar: AppBar(
         title: Text('Sign Up', style: Globals.kHeading1Style),
       ),
-      body: Container(
-        constraints: BoxConstraints(maxWidth: Globals.webMaxWidth),
-        padding: Globals.kScreenPadding,
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            children: [
-              TextFormField(
-                style: Globals.kBodyText1Style,
-                controller: _name,
-                decoration: InputDecoration(hintText: 'Enter Name'),
-                validator: Globals.kFieldRequiredValidator,
-              ),
-              SizedBox(height: 4.w),
-              TextFormField(
-                style: Globals.kBodyText1Style,
-                controller: _email,
-                decoration: InputDecoration(hintText: 'Enter Email'),
-                validator: Globals.kFieldRequiredValidator,
-              ),
-            ],
+      body: Center(
+        child: Container(
+          constraints: BoxConstraints(maxWidth: Globals.webMaxWidth),
+          padding: Globals.kScreenPadding,
+          child: Form(
+            key: _formKey,
+            child: ListView(
+              children: [
+                TextFormField(
+                  style: Globals.kBodyText1Style,
+                  controller: _name,
+                  decoration: InputDecoration(hintText: 'Enter Name'),
+                  validator: Globals.kFieldRequiredValidator,
+                ),
+                SizedBox(height: 4.w),
+                TextFormField(
+                  style: Globals.kBodyText1Style,
+                  controller: _email,
+                  decoration: InputDecoration(hintText: 'Enter Email'),
+                  validator: Globals.kFieldRequiredValidator,
+                ),
+              ],
+            ),
           ),
         ),
       ),
