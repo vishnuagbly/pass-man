@@ -6,7 +6,7 @@ import 'super_secret_key_web.dart'
 SuperSecret getSuperSecret() => superSecret;
 
 abstract class SuperSecret {
-  Future<List<int>> get superSecret;
+  Future<List<int>> get value;
 
   ///Generate 256 bit keys for AES-GCM
   Future<List<int>> generateKey() async {

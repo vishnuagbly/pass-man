@@ -92,9 +92,12 @@ abstract class AuthStorage {
 
     mPassKey = _key;
 
-    _box.put(_mPassKey, _mPin.cipherText.hexString);
-    _box.put(_mPassSaltKey, salt);
-    _box.put(_mPassMacKey, _mPin.mac.bytes.hexString);
+    await Future.wait([
+      _box.put(_mPassKey, _mPin.cipherText.hexString),
+      _box.put(_mPassSaltKey, salt),
+      _box.put(_mPassMacKey, _mPin.mac.bytes.hexString),
+    ]);
+
   }
 
   static void clearMPass() {

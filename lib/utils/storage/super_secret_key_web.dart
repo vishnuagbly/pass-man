@@ -22,7 +22,7 @@ class SuperSecretWeb extends SuperSecret {
 
   List<int>? _superSecret;
 
-  Future<List<int>> get superSecret async {
+  Future<List<int>> get value async {
     if (_superSecret != null) return _superSecret!;
 
     final _mPassKey = AuthStorage.mPassKey;
