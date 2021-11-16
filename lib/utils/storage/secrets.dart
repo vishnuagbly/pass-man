@@ -21,11 +21,11 @@ class Secrets {
   static Secrets? _instance;
 
   ///This is the super secret key being used to encrypt all secrets.
-  late final Future<List<int>> superSecret;
+  late final SuperSecret superSecret;
   final Box _box;
 
   Secrets._()
-      : superSecret = getSuperSecret().superSecret,
+      : superSecret = getSuperSecret(),
         _box = Hive.box(boxName) {
     _defaultSecretId = _getDefaultSecretIdIfExists();
   }
@@ -105,7 +105,7 @@ class Secrets {
         EncryptedObject.fromMap(Map<String, dynamic>.from(encodedValueMap));
 
     return Secret.fromMap(await encData.decryptToMap(
-      Secret(bytes: await superSecret),
+      Secret(bytes: await superSecret.value),
       force: true,
     ));
   }
@@ -151,7 +151,7 @@ class Secrets {
 
   Future<String> add(Secret secret) async {
     final encSecretObj = await EncryptedObject.create(
-        secret.toString().codeUnits, Secret(bytes: await superSecret));
+        secret.toString().codeUnits, Secret(bytes: await superSecret.value));
 
     await Hive.box(boxName).put(
       secret.id,

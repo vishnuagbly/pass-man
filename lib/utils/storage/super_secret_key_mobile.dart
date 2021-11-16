@@ -17,7 +17,7 @@ class SuperSecretMobile extends SuperSecret {
     return _instance!;
   }
 
-  Future<List<int>> get superSecret async {
+  Future<List<int>> get value async {
     if (_superSecret != null) return _superSecret!;
 
     final _storage = FlutterSecureStorage();

@@ -4,5 +4,5 @@ import 'package:passman/utils/storage/super_secret_key_web.dart';
 
 Future<void> configureApp() async {
   setUrlStrategy(PathUrlStrategy());
-  await Hive.openBox(SuperSecretWeb.superSecretBoxName);
+  await Hive.openBox<List<int>>(SuperSecretWeb.superSecretBoxName);
 }

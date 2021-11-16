@@ -34,7 +34,8 @@ dependencies:
   cloud_firestore: ^3.1.0
   google_fonts: ^2.1.0
   flutter_modular: ^4.1.2
-  flutter_riverpod: ^1.0.0
+  flutter_riverpod: 1.0.0-dev.10
+  riverpod: 1.0.0-dev.10
   firebase_dynamic_links: ^3.0.1
   local_auth: ^1.1.8
   helpful_components: ^0.0.2

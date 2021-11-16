@@ -64,7 +64,7 @@ class AccountsList extends ChangeNotifier {
     if (!onlyInMemory)
       account.uploadToDatabase().catchError((err) {
         print(err);
-        remove(account);
+        remove(account, completeDelete: true);
       });
     accounts[account.uuid] =
         StateNotifierProvider.autoDispose<AccountNotifier, Account>(
